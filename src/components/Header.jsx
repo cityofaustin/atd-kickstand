@@ -1,14 +1,14 @@
-import React from 'react';
-import Row from 'react-bootstrap/Row';
-import Col from 'react-bootstrap/Col';
+import React from "react";
+import Row from "react-bootstrap/Row";
+import Col from "react-bootstrap/Col";
 
 function Header() {
   return (
-      <Row className="bg-dark text-white">
+    <Row className="bg-light">
       <Col>
-          <h2>John's Admin App</h2>
-          </Col>
-    </Row>    
+        <h2 className="text-right">John's Admin App</h2>
+      </Col>
+    </Row>
   );
 }
 

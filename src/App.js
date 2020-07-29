@@ -10,6 +10,7 @@ import {
 import Container from "react-bootstrap/Container";
 import Row from "react-bootstrap/Row";
 import Col from "react-bootstrap/Col";
+import Spinner from "react-bootstrap/Spinner";
 import Nav from "./components/Nav";
 import Page from "./components/Page";
 import Header from "./components/Header";
@@ -27,60 +28,60 @@ const client = new ApolloClient({
 });
 
 const APP_QUERY = gql`
-  query Pages {
-    meta_pages {
+ query Pages {
+  meta_pages {
+    id
+    label
+    route
+    slug
+    description
+    use_param
+    show_in_menu
+    weight
+    query {
       id
-      label
-      route
-      slug
-      description
-      use_param
-      show_in_menu
+      gql
+    }
+    tables {
+      id
+      links
       query {
         id
         gql
       }
-      views {
-        id
-        label
-        tables {
+      fields {
+        field {
           id
-          links
-          query {
-            id
-            gql
-          }
-          fields {
-            field {
-              id
-              helper_text
-              label
-              name
-            }
-          }
+          helper_text
+          label
+          name
         }
-        forms {
+      }
+    }
+    forms {
+      id
+      description
+      action
+      mutation
+      fields {
+        read_only
+        row
+        field {
+          data_type
+          helper_text
           id
-          fields {
-            read_only
-            row
-            field {
-              data_type
-              helper_text
-              id
-              input_type
-              label
-              name
-              options
-              placeholder
-              subfields
-              table_name
-            }
-          }
+          input_type
+          label
+          name
+          options
+          placeholder
+          subfields
+          table_name
         }
       }
     }
   }
+}
 `;
 
 function getPageComponent(page) {
@@ -93,22 +94,41 @@ function getPageComponent(page) {
   }
 }
 
+function sortPages(pages) {
+  // sort pages in descending order by weight. ie higher weight = higher on nav
+  return pages.sort(function (a, b) {
+    return b.weight - a.weight;
+  });
+}
+
 function GetPages(props) {
   const { loading, error, data } = useQuery(APP_QUERY);
-  if (loading) return <p>Loading...</p>;
-  if (error) return <p>Errors: {getErrorMessage(error)}</p>;
-  return data["meta_pages"].map((page) => {
+  if (loading)
     return (
-      <Route key={page.id} path={`${page.route}${page.slug}`}>
-          <Header />
-          <Row>
-          <Col xs={4} sm={2} className="bg-dark text-white vh-100">
-              <Nav
-                pages={data["meta_pages"].filter((page) => page.show_in_menu)}
-              />
-            </Col>
-            <Col>{getPageComponent(page)}</Col>
-          </Row>
+      <Spinner animation="border" role="status">
+        <span className="sr-only">Loading...</span>
+      </Spinner>
+    );
+  if (error) return <p>Errors: {getErrorMessage(error)}</p>;
+
+  // we clone the apollo response becausse it's immutable. TODO: is this a config setting?
+  let pages = [...data.meta_pages];
+  pages = sortPages(pages);
+
+  return pages.map((page) => {
+    return (
+      <Route exact strict key={page.id} path={`${page.route}${page.slug}`}>
+        <Header />
+        <Row>
+          <Col xs={4} sm={2} className="bg-light vh-100">
+            <Nav
+              pages={pages.filter((page) => page.show_in_menu)}
+            />
+          </Col>
+          <Col>
+            <Container>{getPageComponent(page)}</Container>
+          </Col>
+        </Row>
       </Route>
     );
   });

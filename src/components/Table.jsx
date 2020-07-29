@@ -53,17 +53,21 @@ export default function DataTable(props) {
   // page component
   const param = props.param;
   const match = props.match;
-  console.log("match", match, "param", param);
+
   const query =
     param && match
       ? props.data.query.gql.replace(`$${param}`, match)
       : props.data.query.gql;
-  console.log("replace", query)
-  const { loading, error, data } = useQuery(
+
+  const { loading, error, data, refetch } = useQuery(
     gql`
       ${query}
     `
   );
+
+  React.useEffect(() => {
+    refetch();
+  }, [props.refetch]);
 
   if (loading)
     return (
@@ -81,7 +85,7 @@ export default function DataTable(props) {
 
   // todo: we only support a single link object (not multiple "links")
   const links = props.data.links;
-  
+
   if (links) {
     const linkCol = {
       field: { id: links.id, label: links.label, name: links.id },
@@ -89,7 +93,7 @@ export default function DataTable(props) {
     fields.push(linkCol);
     rows = rows.map((row) => linkHandler(row, links));
   }
-  console.log("DATA", data);
+
   return (
     <Row>
       <Col className="p-0">
