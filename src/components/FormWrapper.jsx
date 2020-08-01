@@ -6,6 +6,8 @@ import Form from "react-bootstrap/Form";
 import Button from "react-bootstrap/Button";
 import Spinner from "react-bootstrap/Spinner";
 import Alert from "react-bootstrap/Alert";
+import Autocomplete from "./Autocomplete";
+import { Typeahead } from "react-bootstrap-typeahead";
 
 const FIELD_COMPONENT_MAP = {
   email: { component: Form.Control },
@@ -13,13 +15,16 @@ const FIELD_COMPONENT_MAP = {
   check: { component: Form.Check },
   select: { component: Form.Control, props: { as: "select" } },
   text_area: { component: Form.Control, props: { as: "textarea", rows: "3" } },
+  autocomplete: { component: Autocomplete },
 };
 
 function getInputComponent(field) {
   const componentDef = FIELD_COMPONENT_MAP[field.input_type];
   const FormInputComponent = componentDef.component;
 
-  if (field.options) {
+  if (field.input_type === "autocomplete") {
+    return <Autocomplete field={field} />;
+  } else if (field.options) {
     return (
       <FormInputComponent
         size="sm"
@@ -48,11 +53,13 @@ function getInputComponent(field) {
 
 function getField(field) {
   return (
-    <Form.Group key={field.id} controlId={field.name}>
-      <Form.Label>{field.label}</Form.Label>
-      {getInputComponent(field)}
-      <Form.Text className="text-muted">{field.helper_text}</Form.Text>
-    </Form.Group>
+    <Col>
+      <Form.Group key={field.name} controlId={field.name}>
+        <Form.Label size="sm">{field.label}</Form.Label>
+        {getInputComponent(field)}
+        <Form.Text className="text-muted">{field.helper_text}</Form.Text>
+      </Form.Group>
+    </Col>
   );
 }
 
@@ -78,13 +85,21 @@ function handleSubmit(
 }
 
 function handleChange(e, formValues, setFormValues) {
+  debugger;
   formValues[e.target.id] = e.target.value;
   setFormValues(formValues);
 }
 
-function FormWrapper(props) {
-  // our base mutation query will be updated with the form data (by replace $object) with
-  // the form payload
+function groupFieldsIntoColumns(fields, num_columns) {
+  num_columns = num_columns < 1 ? 1 : num_columns;
+  let columns = [];
+  for (let i = 0; i < fields.length; i += num_columns) {
+    columns.push(fields.slice(i, i + num_columns));
+  }
+  return columns;
+}
+
+export default function FormWrapper(props) {
   const [submitted, setSubmitted] = React.useState(false);
   const [submitForm, loading, error, data] = useMutation(
     gql`
@@ -92,17 +107,21 @@ function FormWrapper(props) {
     `
   );
   const fields = props.data.fields;
-  // initialize the form values state, one key per form, all undefined
+  // initialize the form values state, one key per field, all undefined
   // todo: this won't work for an "update" form, obviously
   // todo: support default vals
+  // todo: support `weight` field prop
   let initalValues = {};
 
   fields.map((field) => {
     initalValues[field.field.name] = undefined;
+    return null;
   });
 
   // this state will be updated on any input change
   const [formValues, setFormValues] = React.useState(initalValues);
+
+  const columns = groupFieldsIntoColumns(fields, props.data.num_columns);
 
   if (submitted && error) {
     return <Alert variant="danger">{getErrorMessage(error)}</Alert>;
@@ -137,8 +156,8 @@ function FormWrapper(props) {
   }
 
   return (
-    <Row>
-      <Col md={6}>
+    <Row key={`form-${props.data.id}`}>
+      <Col>
         <Form
           onChange={(e) => handleChange(e, formValues, setFormValues)}
           onSubmit={(e) =>
@@ -152,8 +171,14 @@ function FormWrapper(props) {
             )
           }
         >
-          {fields.map((field) => {
-            return getField(field.field);
+          {columns.map((fields, i) => {
+            return (
+              <Row>
+                {fields.map((field) => {
+                  return getField(field.field);
+                })}
+              </Row>
+            );
           })}
           <Button variant="primary" type="submit">
             Submit
@@ -163,5 +188,3 @@ function FormWrapper(props) {
     </Row>
   );
 }
-
-export default FormWrapper;

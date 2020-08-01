@@ -14,7 +14,6 @@ import Spinner from "react-bootstrap/Spinner";
 import Nav from "./components/Nav";
 import Page from "./components/Page";
 import Header from "./components/Header";
-import PageWithRouteParam from "./components/PageWithRouteParam";
 
 function getErrorMessage(error) {
   // see: https://www.apollographql.com/docs/react/data/error-handling/
@@ -28,70 +27,29 @@ const client = new ApolloClient({
 });
 
 const APP_QUERY = gql`
- query Pages {
-  meta_pages {
-    id
-    label
-    route
-    slug
-    description
-    use_param
-    show_in_menu
-    weight
-    query {
+  query Pages {
+    meta_pages {
       id
-      gql
-    }
-    tables {
-      id
-      links
+      label
+      slug
+      route
+      description
+      use_param
+      show_in_menu
+      weight
       query {
         id
         gql
-      }
-      fields {
-        field {
-          id
-          helper_text
-          label
-          name
-        }
-      }
-    }
-    forms {
-      id
-      description
-      action
-      mutation
-      fields {
-        read_only
-        row
-        field {
-          data_type
-          helper_text
-          id
-          input_type
-          label
-          name
-          options
-          placeholder
-          subfields
-          table_name
-        }
+        variables
       }
     }
   }
-}
 `;
 
 function getPageComponent(page) {
   // TODO: we don't need to fork. every page should param query-driven for render
   // the app-level query should just fetch the pages and their queries
-  if (page.query) {
-    return <PageWithRouteParam key={page.id} data={page} />;
-  } else {
-    return <Page key={page.id} data={page} />;
-  }
+  return <Page key={page.id} data={page} />;
 }
 
 function sortPages(pages) {
@@ -121,9 +79,7 @@ function GetPages(props) {
         <Header />
         <Row>
           <Col xs={4} sm={2} className="bg-light vh-100">
-            <Nav
-              pages={pages.filter((page) => page.show_in_menu)}
-            />
+            <Nav pages={pages.filter((page) => page.show_in_menu)} />
           </Col>
           <Col>
             <Container>{getPageComponent(page)}</Container>

@@ -3,7 +3,7 @@ import { gql, useQuery } from "@apollo/client";
 
 import Col from "react-bootstrap/Col";
 import Row from "react-bootstrap/Row";
-import Table from "react-bootstrap/Table";
+import BootstrapTable from "react-bootstrap/Table";
 import Spinner from "react-bootstrap/Spinner";
 
 // here's a query to create the views table:
@@ -41,29 +41,45 @@ function linkHandler(row, link) {
   row = { ...row };
   link = { ...link };
 
-  const val = row[link.use_param];
-  const url = link.url.replace(`$${link.use_param}`, val);
-  row[link.id] = <a href={url}>{link.label}</a>;
+  for (let i = 0; i < link.use_params.length; i++) {
+    const param = link.use_params[i];
+    const val = row[param];
+    link.url = link.url.replace(`$${param}`, val);
+  }
+
+  row[link.id] = <a href={link.url}>{link.label}</a>;
   return row;
 }
 
-export default function DataTable(props) {
+function handleValue(row, field) {
+  // logic to stringify row value for table cell
+  const val = row[field.field.name];
+  return field.field.input_type === "json" ? JSON.stringify(val) : val;
+}
+
+function sortByWeight(fields) {
+  debugger;
+  // sort table columns in descending order by weight. ie higher weight = higher on page
+  return fields.sort(function (a, b) {
+    return b.weight - a.weight;
+  });
+}
+
+const Table = React.memo((props) => {
   // we search for the param variable name in the table's graphql query and replace it
   // with the value "match" which has been passed down from route-matching in the
   // page component
   const param = props.param;
   const match = props.match;
 
-  const query =
-    param && match
-      ? props.data.query.gql.replace(`$${param}`, match)
-      : props.data.query.gql;
+  const variables = param && match ? { [param]: match } : {};
+  const query = gql`
+    ${props.data.query.gql}
+  `;
 
-  const { loading, error, data, refetch } = useQuery(
-    gql`
-      ${query}
-    `
-  );
+  const { loading, error, data, refetch } = useQuery(query, {
+    variables: variables,
+  });
 
   React.useEffect(() => {
     refetch();
@@ -81,7 +97,9 @@ export default function DataTable(props) {
   const accessor = Object.keys(data)[0];
   let rows = data[accessor];
 
-  const fields = props.data.fields.map((field) => field);
+  // we replicate the fields array because apollo returns an immutable obj
+  let fields = [...props.data.fields];
+  fields = sortByWeight(fields);
 
   // todo: we only support a single link object (not multiple "links")
   const links = props.data.links;
@@ -97,21 +115,23 @@ export default function DataTable(props) {
   return (
     <Row>
       <Col className="p-0">
-        <Table striped size="sm">
+        <BootstrapTable striped size="sm">
           <thead className="thead-dark">{generateHeaderRow(fields)}</thead>
           <tbody>
             {rows.map((row, i) => {
               return (
                 <tr key={i}>
-                  {fields.map((field, i) => (
-                    <td key={i}>{row[field.field.name]}</td>
-                  ))}
+                  {fields.map((field, i) => {
+                    return <td key={i}> {handleValue(row, field)}</td>;
+                  })}
                 </tr>
               );
             })}
           </tbody>
-        </Table>
+        </BootstrapTable>
       </Col>
     </Row>
   );
-}
+});
+
+export default Table;
