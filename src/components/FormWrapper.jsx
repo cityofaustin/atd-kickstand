@@ -1,32 +1,40 @@
 import React from "react";
-import { gql, useMutation } from "@apollo/client";
+import { gql, useQuery, useMutation } from "@apollo/client";
 import Row from "react-bootstrap/Row";
 import Col from "react-bootstrap/Col";
-import Form from "react-bootstrap/Form";
+import BsForm from "react-bootstrap/Form";
 import Button from "react-bootstrap/Button";
 import Spinner from "react-bootstrap/Spinner";
 import Alert from "react-bootstrap/Alert";
 import Autocomplete from "./Autocomplete";
 import { Typeahead } from "react-bootstrap-typeahead";
+import { isIntrospectionType } from "graphql";
 
 const FIELD_COMPONENT_MAP = {
-  email: { component: Form.Control },
-  text: { component: Form.Control },
-  check: { component: Form.Check },
-  select: { component: Form.Control, props: { as: "select" } },
-  text_area: { component: Form.Control, props: { as: "textarea", rows: "3" } },
+  email: { component: BsForm.Control },
+  text: { component: BsForm.Control },
+  check: { component: BsForm.Check },
+  select: { component: BsForm.Control, props: { as: "select" } },
+  text_area: {
+    component: BsForm.Control,
+    props: { as: "textarea", rows: "3" },
+  },
   autocomplete: { component: Autocomplete },
 };
 
-function getInputComponent(field) {
+function getInputComponent(field, editing) {
   const componentDef = FIELD_COMPONENT_MAP[field.input_type];
   const FormInputComponent = componentDef.component;
+  const is_read_only = editing && !field.read_only ? false : true;
 
   if (field.input_type === "autocomplete") {
     return <Autocomplete field={field} />;
   } else if (field.options) {
     return (
       <FormInputComponent
+        // todo: sort this out because ready_only is not on field.field prop it's
+        plaintext={is_read_only}
+        readOnly={is_read_only}
         size="sm"
         key={field.id}
         type={field.type}
@@ -41,25 +49,34 @@ function getInputComponent(field) {
   } else {
     return (
       <FormInputComponent
+        // plaintext={field.read_only}
+        // readOnly={field.read_only}
+        plaintext={is_read_only}
+        readOnly={is_read_only}
         size="sm"
         key={field.id}
         type={field.type}
         placeholder={field.placeholder}
+        defaultValue={field.__value__ ? field.__value__ : ""}
         {...componentDef.props}
       />
     );
   }
 }
 
-function getField(field) {
+function getField(field, editing) {
   return (
-    <Col>
-      <Form.Group key={field.name} controlId={field.name}>
-        <Form.Label size="sm">{field.label}</Form.Label>
-        {getInputComponent(field)}
-        <Form.Text className="text-muted">{field.helper_text}</Form.Text>
-      </Form.Group>
-    </Col>
+    <React.Fragment key={field.name}>
+      <BsForm.Label column sm={1} size="sm">
+        {field.label}
+      </BsForm.Label>
+      <Col>
+        {getInputComponent(field, editing)}
+        {editing && (
+          <BsForm.Text className="text-muted">{field.helper_text}</BsForm.Text>
+        )}
+      </Col>
+    </React.Fragment>
   );
 }
 
@@ -85,7 +102,6 @@ function handleSubmit(
 }
 
 function handleChange(e, formValues, setFormValues) {
-  debugger;
   formValues[e.target.id] = e.target.value;
   setFormValues(formValues);
 }
@@ -99,14 +115,97 @@ function groupFieldsIntoColumns(fields, num_columns) {
   return columns;
 }
 
+function SubmitConfirmation(props) {
+  return (
+    <Alert variant="success">
+      <Col>Form submitted!</Col>
+      <Col>
+        <Button
+          variant="secondary"
+          type="reload-form"
+          onClick={(e) => props.setSubmitted(false)}
+        >
+          Reload Form
+        </Button>
+      </Col>
+    </Alert>
+  );
+}
+
+function GetFormData(props) {
+  // TODO: handle errors/loading from this form data query
+  const param = props.param;
+  const match = props.match;
+
+  const variables = param && match ? { [param]: match } : {};
+  const query = gql`
+    ${props.data.query.gql}
+  `;
+
+  const { loading, error, data, refetch } = useQuery(query, {
+    variables: variables,
+  });
+
+  if (typeof data === "object") {
+    const accessor = Object.keys(data)[0];
+    return data[accessor][0];
+  }
+
+  return undefined;
+}
+
+function setInputValues(fields, formValues) {
+  if (formValues === undefined) {
+    return fields;
+  }
+
+  return fields.map((field) => {
+    field.field.__value__ = formValues[field.field.name];
+    return field;
+  });
+}
+
+function copyFieldProps(fields, props = ["read_only", "weight"]) {
+  // we move props from the `field` object to the `field.field` object.
+  // we do this because some form field properties are set on the intermediary
+  // reference table "many_forms_to_many_fields".
+  // obvi this all happens on under the assumption that there will be no namespace
+  // conflicts, ie field.field does not already contain any of the specified props.
+  // todo: alternatives? e.g. use a view that has the data where you want
+  return fields.map((field) => {
+    let mutableField = { ...field };
+    mutableField.field = { ...mutableField.field };
+
+    props.map((prop) => {
+      const val = mutableField[prop];
+      mutableField.field[prop] = val;
+      return null;
+    });
+
+    return mutableField;
+  });
+}
+
+function sortByWeight(fields) {
+  // sort table columns in descending order by weight. ie higher weight = higher on page
+  return fields.sort(function (a, b) {
+    return b.weight - a.weight;
+  });
+}
+
 export default function FormWrapper(props) {
+  // "insert" forms are always edit mode. "edit" forms start ready only and
+  // can be triggered for editing
+  let defaultEditingState = props.data.action === "insert" ? true : false;
+  const [editing, setEditing] = React.useState(defaultEditingState);
   const [submitted, setSubmitted] = React.useState(false);
   const [submitForm, loading, error, data] = useMutation(
     gql`
       ${props.data.mutation}
     `
   );
-  const fields = props.data.fields;
+
+  let fields = [...props.data.fields];
   // initialize the form values state, one key per field, all undefined
   // todo: this won't work for an "update" form, obviously
   // todo: support default vals
@@ -118,8 +217,20 @@ export default function FormWrapper(props) {
     return null;
   });
 
+  fields = copyFieldProps(fields);
+
   // this state will be updated on any input change
   const [formValues, setFormValues] = React.useState(initalValues);
+
+  let formData = props.data.action === "edit" ? GetFormData(props) : undefined;
+
+  React.useEffect(() => {
+    const currenFormValues = formData ? formData : initalValues;
+    setFormValues(currenFormValues);
+  }, [formData]);
+
+  fields = setInputValues(fields, formValues);
+  fields = sortByWeight(fields);
 
   const columns = groupFieldsIntoColumns(fields, props.data.num_columns);
 
@@ -136,55 +247,37 @@ export default function FormWrapper(props) {
   }
 
   if (submitted) {
-    return (
-      <React.Fragment>
-        <Alert variant="success">
-          <Col>Form submitted!</Col>
-          <Col>
-            <Button
-              variant="secondary"
-              type="reload-form"
-              onClick={(e) => setSubmitted(false)}
-            >
-              Reload Form
-            </Button>
-          </Col>
-        </Alert>
-        ;
-      </React.Fragment>
-    );
+    return <SubmitConfirmation setSubmitted={setSubmitted} />;
   }
 
   return (
-    <Row key={`form-${props.data.id}`}>
-      <Col>
-        <Form
-          onChange={(e) => handleChange(e, formValues, setFormValues)}
-          onSubmit={(e) =>
-            handleSubmit(
-              e,
-              formValues,
-              setSubmitted,
-              submitForm,
-              props.refetch,
-              props.setRefetch
-            )
-          }
-        >
-          {columns.map((fields, i) => {
-            return (
-              <Row>
-                {fields.map((field) => {
-                  return getField(field.field);
-                })}
-              </Row>
-            );
-          })}
-          <Button variant="primary" type="submit">
-            Submit
-          </Button>
-        </Form>
-      </Col>
-    </Row>
+    <BsForm
+      onChange={(e) => handleChange(e, formValues, setFormValues)}
+      onSubmit={(e) =>
+        handleSubmit(
+          e,
+          formValues,
+          setSubmitted,
+          submitForm,
+          props.refetch,
+          props.setRefetch
+        )
+      }
+    >
+      {columns.map((fields, i) => {
+        return (
+          <Row key={`form-row-${i}`}>
+            {fields.map((field) => {
+              return getField(field.field, editing);
+            })}
+          </Row>
+        );
+      })}
+      {editing && (
+        <Button variant="primary" type="submit">
+          Submit
+        </Button>
+      )}
+    </BsForm>
   );
 }

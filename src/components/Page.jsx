@@ -21,7 +21,7 @@ function getErrorMessage(error) {
   return error.graphQLErrors.map((message) => message.message);
 }
 
-function sortViews(views) {
+function sortByWeight(views) {
   // sort views in descending order by weight. ie higher weight = higher on page
   return views.sort(function (a, b) {
     return b.weight - a.weight;
@@ -122,6 +122,8 @@ function Page(props) {
             <FormWrapper
               key={`form-${form.id}`}
               data={form}
+              param={param}
+              match={matchVal}
               refetch={refetch}
               setRefetch={setRefetch}
             />
@@ -178,7 +180,7 @@ function Page(props) {
     views = [...views, ...formElements];
   }
 
-  views = sortViews(views);
+  views = sortByWeight(views);
 
   return (
     <React.Fragment>

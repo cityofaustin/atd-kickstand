@@ -58,7 +58,6 @@ function handleValue(row, field) {
 }
 
 function sortByWeight(fields) {
-  debugger;
   // sort table columns in descending order by weight. ie higher weight = higher on page
   return fields.sort(function (a, b) {
     return b.weight - a.weight;
