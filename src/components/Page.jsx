@@ -7,6 +7,7 @@ import Spinner from "react-bootstrap/Spinner";
 import FormWrapper from "./FormWrapper";
 import DataTable from "./Table";
 import Menu from "./Menu";
+import Map from "./Map";
 
 // todo: yeah, this...
 const QUERY_BY_PAGE_ID = {
@@ -94,6 +95,7 @@ function Page(props) {
   const page_data = data.meta_pages[0];
   const forms = page_data.forms;
   const tables = page_data.tables;
+  const maps = page_data.maps;
   let menus = page_data.menus;
   // we set the modal config to a state variable. it will be passed down to
   // the menu button (to trigger showModal state. it looks like this:
@@ -179,7 +181,21 @@ function Page(props) {
     });
     views = [...views, ...formElements];
   }
-
+  if (maps !== undefined && maps.length > 0) {
+    formElements = maps.map((map) => {
+      return {
+        weight: map.weight,
+        elements: (
+          <Row key={`map-${map.id}`}>
+            <Col>
+              <Map data={map} />
+            </Col>
+          </Row>
+        ),
+      };
+    });
+    views = [...views, ...formElements];
+  }
   views = sortByWeight(views);
 
   return (

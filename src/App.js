@@ -47,8 +47,6 @@ const APP_QUERY = gql`
 `;
 
 function getPageComponent(page) {
-  // TODO: we don't need to fork. every page should param query-driven for render
-  // the app-level query should just fetch the pages and their queries
   return <Page key={page.id} data={page} />;
 }
 
@@ -58,6 +56,8 @@ function sortPages(pages) {
     return b.weight - a.weight;
   });
 }
+
+
 
 function GetPages(props) {
   const { loading, error, data } = useQuery(APP_QUERY);
@@ -72,7 +72,7 @@ function GetPages(props) {
   // we clone the apollo response becausse it's immutable. TODO: is this a config setting?
   let pages = [...data.meta_pages];
   pages = sortPages(pages);
-
+  
   return pages.map((page) => {
     return (
       <Route exact strict key={page.id} path={`${page.route}${page.slug}`}>

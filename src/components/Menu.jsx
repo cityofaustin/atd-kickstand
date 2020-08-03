@@ -6,7 +6,6 @@ import Modal from "react-bootstrap/Modal";
 import Page from "./Page";
 
 function ModalWrapper(props) {
-  console.log("props", props)
   return (
     <Modal
       size="xl"

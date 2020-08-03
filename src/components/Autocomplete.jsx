@@ -4,7 +4,7 @@ import Spinner from "react-bootstrap/Spinner";
 import Form from "react-bootstrap/Form";
 import { Typeahead } from "react-bootstrap-typeahead";
 
-const query = `query MyQuery($search_term: String!) {
+const query = `query QueryQueries($search_term: String!) {
   meta_queries(where: {description: {_ilike: $search_term}}) {
     id
     description
@@ -18,14 +18,18 @@ const root = "meta_queries";
 const displayKey = "description";
 
 export default function AsynchronousAutocomplete(props) {
-  const [selected, setSelected] = React.useState(null);
+  // todo: special handling of multi-choice
+  // todo: how to requery api with (refetch?)
+  // not we're not currently modifying the initial "%%" search term. ie., all
+  // values are returned by the query, that's it. tried to implement
+  // a dynamic query by upodating searchTerm with the onInputChange prop, but the
+  // behavior was pretty wonky. consider the AsyncTypeahead componet which is
+  // included: https://github.com/ericgio/react-bootstrap-typeahead/blob/master/docs/API.md#asynctypeahead
+  const [searchTerm, setSearchTerm] = React.useState("%%");
 
-  let options = [];
-  // as currently implemented, search term is not used. we just get all the rows
-  // and use them as options. you could set the search term as as a state property
-  // and use the `onInputChange` prop in Typeahead to re-query the API`
-  const variables = { search_term: "%a%" };
-  const { loading, error, data } = useQuery(
+  const variables = { search_term: searchTerm };
+
+  const { loading, error, data, refetch } = useQuery(
     gql`
       ${query}
     `,
@@ -43,11 +47,18 @@ export default function AsynchronousAutocomplete(props) {
 
   return (
     <Typeahead
-      id={"john"}
-      key="john"
+      id={props.field.name}
+      key={props.field.name}
       options={data[root]}
       labelKey="description"
-      onChange={setSelected}
+      onChange={(arrayOfObjs) => {
+        const value = arrayOfObjs[0] ? arrayOfObjs[0].id : "";
+        props.onChange(
+          { target: { id: props.field.name, value: value } },
+          props.formValues,
+          props.setFormValues
+        );
+      }}
     />
   );
 }

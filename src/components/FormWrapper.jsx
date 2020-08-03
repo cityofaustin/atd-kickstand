@@ -7,8 +7,9 @@ import Button from "react-bootstrap/Button";
 import Spinner from "react-bootstrap/Spinner";
 import Alert from "react-bootstrap/Alert";
 import Autocomplete from "./Autocomplete";
-import { Typeahead } from "react-bootstrap-typeahead";
-import { isIntrospectionType } from "graphql";
+
+// not using; but in case this comes in handy elsewhere
+// const GQL_VAR_MATCH_PATTERN = /(\$[a - z || 0 - 9] +) (?=:)/g;
 
 const FIELD_COMPONENT_MAP = {
   email: { component: BsForm.Control },
@@ -22,23 +23,35 @@ const FIELD_COMPONENT_MAP = {
   autocomplete: { component: Autocomplete },
 };
 
-function getInputComponent(field, editing) {
-  const componentDef = FIELD_COMPONENT_MAP[field.input_type];
-  const FormInputComponent = componentDef.component;
+function getInputComponent(field, editing, formValues, setFormValues) {
   const is_read_only = editing && !field.read_only ? false : true;
+  // todo: aint pretty, but we we can't set autocomplete as readonly, we have to use a text input instead
+  // see: https://github.com/ericgio/react-bootstrap-typeahead/issues/324
+  const input_type =
+    field.input_type === "autocomplete" && is_read_only
+      ? "text"
+      : field.input_type;
+  const componentDef = FIELD_COMPONENT_MAP[input_type];
+  const FormInputComponent = componentDef.component;
 
-  if (field.input_type === "autocomplete") {
-    return <Autocomplete field={field} />;
+  if (input_type === "autocomplete") {
+    return (
+      <Autocomplete
+        field={field}
+        onChange={(e) => handleChange(e, formValues, setFormValues)}
+      />
+    );
   } else if (field.options) {
     return (
       <FormInputComponent
-        // todo: sort this out because ready_only is not on field.field prop it's
         plaintext={is_read_only}
         readOnly={is_read_only}
         size="sm"
-        key={field.id}
+        key={field.name}
+        id={field.name}
         type={field.type}
         placeholder={field.placeholder}
+        onChange={(e) => handleChange(e, formValues, setFormValues)}
         {...componentDef.props}
       >
         {field.options.map((option) => (
@@ -49,14 +62,14 @@ function getInputComponent(field, editing) {
   } else {
     return (
       <FormInputComponent
-        // plaintext={field.read_only}
-        // readOnly={field.read_only}
         plaintext={is_read_only}
         readOnly={is_read_only}
         size="sm"
-        key={field.id}
+        key={field.name}
+        id={field.name}
         type={field.type}
         placeholder={field.placeholder}
+        onChange={(e) => handleChange(e, formValues, setFormValues)}
         defaultValue={field.__value__ ? field.__value__ : ""}
         {...componentDef.props}
       />
@@ -64,14 +77,14 @@ function getInputComponent(field, editing) {
   }
 }
 
-function getField(field, editing) {
+function getField(field, editing, formValues, setFormValues) {
   return (
     <React.Fragment key={field.name}>
       <BsForm.Label column sm={1} size="sm">
-        {field.label}
+        <b>{field.label}</b>
       </BsForm.Label>
       <Col>
-        {getInputComponent(field, editing)}
+        {getInputComponent(field, editing, formValues, setFormValues)}
         {editing && (
           <BsForm.Text className="text-muted">{field.helper_text}</BsForm.Text>
         )}
@@ -102,6 +115,7 @@ function handleSubmit(
 }
 
 function handleChange(e, formValues, setFormValues) {
+  console.log("FORMVALUES", formValues);
   formValues[e.target.id] = e.target.value;
   setFormValues(formValues);
 }
@@ -207,9 +221,7 @@ export default function FormWrapper(props) {
 
   let fields = [...props.data.fields];
   // initialize the form values state, one key per field, all undefined
-  // todo: this won't work for an "update" form, obviously
   // todo: support default vals
-  // todo: support `weight` field prop
   let initalValues = {};
 
   fields.map((field) => {
@@ -252,7 +264,6 @@ export default function FormWrapper(props) {
 
   return (
     <BsForm
-      onChange={(e) => handleChange(e, formValues, setFormValues)}
       onSubmit={(e) =>
         handleSubmit(
           e,
@@ -268,14 +279,25 @@ export default function FormWrapper(props) {
         return (
           <Row key={`form-row-${i}`}>
             {fields.map((field) => {
-              return getField(field.field, editing);
+              return getField(field.field, editing, formValues, setFormValues);
             })}
           </Row>
         );
       })}
       {editing && (
         <Button variant="primary" type="submit">
-          Submit
+          Save
+        </Button>
+      )}
+      {!editing && (
+        <Button
+          variant="secondary"
+          type="submit"
+          onClick={(e) => {
+            setEditing(true);
+          }}
+        >
+          Edit
         </Button>
       )}
     </BsForm>
