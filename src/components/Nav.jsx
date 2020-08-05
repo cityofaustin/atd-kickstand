@@ -5,13 +5,11 @@ import Col from "react-bootstrap/Col";
 export default function Nav(props) {
   return props.pages.map((page) => {
     return (
-      <Row key={page.id}>
-        <Col>
-          <a href={`/${page.slug}`} className="text-reset">
-            <p className="text-right">{page.label}</p>
-          </a>
-        </Col>
-      </Row>
+      <Col key={page.props.id}>
+        <a href={page.props.route} className="text-reset">
+          <p className="text-right">{page.props.title}</p>
+        </a>
+      </Col>
     );
   });
 }
