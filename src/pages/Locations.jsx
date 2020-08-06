@@ -15,12 +15,20 @@ export default function Locations() {
     <Route {...pageConf.route}>
       <Header />
       <Page {...pageConf}>
-          <Menu id="locations_menu" key="locations_menu" buttons={CONFIG.menus.locations.buttons} />
-          <Query query={CONFIG.queries.locations}>
-          <Modal hostMenuId="locations_menu" buttonId="modal_button_1" title="Cool!">
+        <Menu
+          id="locations_menu"
+          key="locations_menu"
+          buttons={CONFIG.menus.locations.buttons}
+        />
+        <Query query={CONFIG.queries.locations}>
+          <Modal
+            hostMenuId="locations_menu"
+            buttonId="modal_button_1"
+            title="Cool!"
+          >
             <Form {...CONFIG.forms.create_location} />
           </Modal>
-          <Table {...CONFIG.tables.locations} />
+          <Table root_key="locations" {...CONFIG.tables.locations} />
         </Query>
       </Page>
     </Route>

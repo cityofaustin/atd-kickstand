@@ -31,7 +31,7 @@ function handleValue(row, field) {
 }
 
 export default function Table(props) {
-  let rows = cloneDeep(props.data);
+  let rows = cloneDeep(props.data[props.root_key]);
   let fields = props.fields;
 
   // todo: not tested with multiple links
@@ -52,6 +52,11 @@ export default function Table(props) {
   return (
     <Row>
       <Col className="p-0">
+        <Row>
+          <Col>
+            <h2>{props.icon || ""} {props.title}</h2>
+          </Col>
+        </Row>
         <BootstrapTable striped size="sm">
           <thead className="thead-dark">
             {generateHeaderRow(props.fields)}

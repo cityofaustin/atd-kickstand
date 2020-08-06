@@ -27,7 +27,7 @@ export default function Query(props) {
   if (error) return <p>Oh no... {error.message}</p>;
 
   const kiddos = React.Children.map(props.children, (child) => {
-    const propsData = props.raw ? data : data[Object.keys(data)[0]];
+    const propsData = data;
     return React.cloneElement(child, {
       data: propsData,
       reexecuteQuery: reexecuteQuery,

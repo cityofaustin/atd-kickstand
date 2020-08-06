@@ -6,14 +6,15 @@ const MAPBOX_TOKEN = `pk.eyJ1Ijoiam9obmNsYXJ5IiwiYSI6ImNrM29wNnB3dDAwcXEzY29zMTU
 class Map extends React.Component {
   constructor(props) {
     super(props);
+    const data = props.data[props.root_key][0];
     this.state = {
-      latitude: props.data[0].latitude,
-      longitude: props.data[0].longitude,
+      latitude: data.latitude,
+      longitude: data.longitude,
       viewport: {
         width: "100%",
         height: 500,
-        latitude: props.data[0].latitude,
-        longitude: props.data[0].longitude,
+        latitude: data.latitude,
+        longitude: data.longitude,
         zoom: 14,
       },
     };

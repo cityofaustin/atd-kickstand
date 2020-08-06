@@ -1,5 +1,5 @@
 import React from "react";
-import { FaMapMarkerAlt } from "react-icons/fa";
+import { FaMapMarkerAlt, FaTrafficLight } from "react-icons/fa";
 
 const CONFIG = {
   pages: {
@@ -47,7 +47,7 @@ const CONFIG = {
           }
         }
         `,
-        variables: ["object"]
+        variables: ["object"],
       },
       fields: [
         {
@@ -139,7 +139,7 @@ const CONFIG = {
         }
       }
       `,
-        idParam: "id"
+        idParam: "id",
       },
     },
   },
@@ -175,6 +175,24 @@ const CONFIG = {
         },
       ],
     },
+    signals_at_location: {
+      title: "Signals",
+      icon: <FaTrafficLight/>,
+      fields: [
+        {
+          id: 1,
+          name: "id",
+          label: "ID",
+          data_type: "text",
+        },
+        {
+          id: 2,
+          name: "type",
+          label: "Type",
+          data_type: "text",
+        },
+      ],
+    },
   },
   queries: {
     locations: {
@@ -189,7 +207,8 @@ const CONFIG = {
         latitude
         longitude
         council_district
-      }
+      },
+      signals(where: {location_id: {_eq: $id}}) { id location_id type }
     }`,
       variables: ["id"],
     },

@@ -25,17 +25,15 @@ function handleSubmit(
   submitForm,
   idParam,
   setEditing,
-  setShowSubmitConfirmation,
   reexecuteQuery
 ) {
   e.preventDefault();
   let idVal = currentValues[idParam];
   // reduce current values to only those fields which have been defined in the form
-  const fieldKeys = fields.map(field => field.name);
+  const fieldKeys = fields.map((field) => field.name);
   const submitValues = filterByKeys(currentValues, fieldKeys);
   submitForm({ object: submitValues, [idParam]: idVal }).then((result) => {
     setEditing(false);
-    setShowSubmitConfirmation(true);
     reexecuteQuery();
   });
 }
@@ -47,26 +45,6 @@ function groupFieldsIntoColumns(fields, num_columns) {
     columns.push(fields.slice(i, i + num_columns));
   }
   return columns;
-}
-
-function SubmitConfirmation(props) {
-  return (
-    <>
-      <Alert variant="success">
-        <Col>
-          <Button
-            type="button"
-            className="close"
-            aria-label="Close"
-            onClick={(e) => props.setShowSubmitConfirmation(false)}
-          >
-            <span aria-hidden="true">&times;</span>
-          </Button>
-          Form submitted!
-        </Col>
-      </Alert>
-    </>
-  );
 }
 
 function handleChange(e, currentValues, setCurrentValues) {
@@ -95,10 +73,7 @@ export default function Form(props) {
   const [submitFormResult, submitForm] = useMutation(props.mutation.gql);
   const [editing, setEditing] = React.useState(false);
   const [changeEvent, setChangeEvent] = React.useState(null);
-  const [showSubmitConfirmation, setShowSubmitConfirmation] = React.useState(
-    false
-  );
-  // initialize the form values state, one key per field, all undefined
+
   let fields = [...props.fields];
 
   let initialValues = {};
@@ -111,7 +86,7 @@ export default function Form(props) {
   // this state will be updated on any input change
   const [currentValues, setCurrentValues] = React.useState(initialValues);
 
-  const formData = props.data[0];
+  const formData = props.data[props.root_key][0];
 
   React.useEffect(() => {
     setCurrentValues(cloneDeep(formData) || initialValues);
@@ -144,7 +119,6 @@ export default function Form(props) {
             submitForm,
             props.mutation.idParam,
             setEditing,
-            setShowSubmitConfirmation,
             props.reexecuteQuery
           )
         }
@@ -175,18 +149,12 @@ export default function Form(props) {
             </Button>
           </>
         )}
-        {showSubmitConfirmation && (
-          <SubmitConfirmation
-            setShowSubmitConfirmation={setShowSubmitConfirmation}
-          />
-        )}
         {!editing && (
           <Button
             key="edit"
             variant="secondary"
             onClick={(e) => {
               setEditing(true);
-              setShowSubmitConfirmation(false);
             }}
             type="edit"
           >
