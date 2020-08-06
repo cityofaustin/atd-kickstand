@@ -1,5 +1,4 @@
 import React from "react";
-import { gql, useQuery } from "@apollo/client";
 import Col from "react-bootstrap/Col";
 import Row from "react-bootstrap/Row";
 import BootstrapTable from "react-bootstrap/Table";
@@ -13,12 +12,6 @@ function generateHeaderRow(fields) {
       })}
     </tr>
   );
-}
-
-function getErrorMessage(error) {
-  // see: https://www.apollographql.com/docs/react/data/error-handling/
-  console.log(error.graphQLErrors);
-  return error.graphQLErrors.map((message) => message.message);
 }
 
 // function linkHandler(row, link) {
@@ -44,24 +37,6 @@ function handleValue(row, field) {
 }
 
 export default function Table(props) {
-  const query = gql`
-    ${props.query}
-  `;
-
-  const { loading, error, data } = useQuery(query);
-
-  if (loading)
-    return (
-      <Spinner animation="border" role="status">
-        <span className="sr-only">Loading...</span>
-      </Spinner>
-    );
-
-  if (error) return <p>Errors: {getErrorMessage(error)}</p>;
-
-  const accessor = Object.keys(data)[0];
-  let rows = data[accessor];
-
   // todo: we only support a single link object (not multiple "links")
   // const links = props.data.links;
 
@@ -79,7 +54,7 @@ export default function Table(props) {
         <BootstrapTable striped size="sm">
           <thead className="thead-dark">{generateHeaderRow(props.fields)}</thead>
           <tbody>
-            {rows.map((row, i) => {
+            {props.data.map((row, i) => {
               return (
                 <tr key={i}>
                   {props.fields.map((field, i) => {

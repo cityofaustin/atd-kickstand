@@ -1,5 +1,5 @@
 import React from "react";
-import { gql, useQuery, useMutation } from "@apollo/client";
+import { useMutation } from "urql";
 import { cloneDeep } from "lodash";
 import Row from "react-bootstrap/Row";
 import Col from "react-bootstrap/Col";
@@ -18,16 +18,6 @@ function filterByKeys(object, keys) {
     }, {});
 }
 
-function handleSubmitComplete(
-  setNeedsRefetch,
-  setEditing,
-  setShowSubmitConfirmation
-) {
-  setNeedsRefetch(true);
-  setEditing(false);
-  setShowSubmitConfirmation(true);
-}
-
 function handleSubmit(
   e,
   currentValues,
@@ -43,13 +33,10 @@ function handleSubmit(
   // reduce current values to only those fields which have been defined in the form
   const fieldKeys = fields.map((field) => field.name);
   const submitValues = filterByKeys(currentValues, fieldKeys);
-  submitForm({
-    variables: { object: submitValues, [idParam]: idVal },
-    onCompleted: handleSubmitComplete(
-      setNeedsRefetch,
-      setEditing,
-      setShowSubmitConfirmation
-    ),
+  submitForm({ object: submitValues, [idParam]: idVal }).then((result) => {
+    setNeedsRefetch(true);
+    setEditing(false);
+    setShowSubmitConfirmation(true);
   });
 }
 
@@ -82,26 +69,6 @@ function SubmitConfirmation(props) {
   );
 }
 
-function GetFormData(props) {
-  // TODO: handle errors/loading from this form data query
-  const variables = props.useVariables ? props.useVariables : {};
-
-  const query = gql`
-    ${props.query.gql}
-  `;
-
-  const { data, refetch } = useQuery(query, {
-    variables: variables,
-  });
-
-  if (typeof data === "object") {
-    const accessor = Object.keys(data)[0];
-    return [data[accessor][0], refetch];
-  }
-
-  return [data, refetch];
-}
-
 function handleChange(e, currentValues, setCurrentValues) {
   if (e === null) {
     // handles initial state
@@ -115,6 +82,7 @@ function handleChange(e, currentValues, setCurrentValues) {
 function getFormField(field, editing, currentValue, setChangeEvent) {
   return (
     <FormField
+      key={field.name}
       field={field}
       editing={editing}
       value={currentValue}
@@ -124,17 +92,12 @@ function getFormField(field, editing, currentValue, setChangeEvent) {
 }
 
 export default function Form(props) {
+  const [submitFormResult, submitForm] = useMutation(props.mutation.gql);
   const [editing, setEditing] = React.useState(false);
   const [changeEvent, setChangeEvent] = React.useState(null);
   const [showSubmitConfirmation, setShowSubmitConfirmation] = React.useState(
     false
   );
-  const [submitForm, { data }] = useMutation(
-    gql`
-      ${props.mutation.gql}
-    `
-  );
-
   // initialize the form values state, one key per field, all undefined
   let fields = [...props.fields];
 
@@ -149,8 +112,14 @@ export default function Form(props) {
   // this state will be updated on any input change
   const [currentValues, setCurrentValues] = React.useState(initialValues);
 
-  // formData is immutable once fetched from gql
-  let [formData, refetch] = GetFormData(props);
+  const formData = props.data[0];
+
+  React.useEffect(() => {
+    if (needsRefetch) {
+      props.reexecuteQuery();
+      setNeedsRefetch(false);
+    }
+  }, [needsRefetch, props]);
 
   React.useEffect(() => {
     setCurrentValues(cloneDeep(formData) || initialValues);
@@ -159,13 +128,6 @@ export default function Form(props) {
   React.useEffect(() => {
     setCurrentValues(cloneDeep(formData) || initialValues);
   }, [editing]);
-
-  React.useEffect(() => {
-    if (needsRefetch) {
-      refetch();
-      setNeedsRefetch(false);
-    }
-  }, [needsRefetch]);
 
   React.useEffect(() => {
     // handle the change and set the current values
@@ -206,10 +168,11 @@ export default function Form(props) {
         })}
         {editing && (
           <>
-            <Button variant="primary" type="submit">
+            <Button key="submit" variant="primary" type="submit">
               <FaCheckCircle /> Save
             </Button>
             <Button
+              key="cancel"
               variant="warning"
               type="cancel"
               onClick={(e) => {
@@ -227,6 +190,7 @@ export default function Form(props) {
         )}
         {!editing && (
           <Button
+            key="edit"
             variant="secondary"
             onClick={(e) => {
               setEditing(true);

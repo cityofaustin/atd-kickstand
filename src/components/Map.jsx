@@ -10,13 +10,13 @@ class Map extends React.Component {
   constructor(props) {
     super(props);
     this.state = {
-      latitude: props.latitude,
-      longitude: props.longitude,
+      latitude: props.data[0].latitude,
+      longitude: props.data[0].longitude,
       viewport: {
         width: "100%",
         height: 500,
-        latitude: props.latitude,
-        longitude: props.longitude,
+        latitude: props.data[0].latitude,
+        longitude: props.data[0].longitude,
         zoom: 14,
       },
     };
