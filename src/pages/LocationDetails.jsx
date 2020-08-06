@@ -5,7 +5,6 @@ import Header from "../components/Header";
 import Query from "../components/Query";
 import Menu from "../components/Menu";
 import Form from "../components/UpdateForm";
-import Table from "../components/Table";
 import Map from "../components/Map";
 import CONFIG from "../config/config";
 

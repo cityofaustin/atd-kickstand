@@ -23,20 +23,14 @@ function handleSubmit(
   currentValues,
   fields,
   submitForm,
-  idParam,
-  setEditing,
-  setShowSubmitConfirmation,
-  reexecuteQuery
+  setShowSubmitConfirmation
 ) {
   e.preventDefault();
-  let idVal = currentValues[idParam];
   // reduce current values to only those fields which have been defined in the form
-  const fieldKeys = fields.map(field => field.name);
+  const fieldKeys = fields.map((field) => field.name);
   const submitValues = filterByKeys(currentValues, fieldKeys);
-  submitForm({ object: submitValues, [idParam]: idVal }).then((result) => {
-    setEditing(false);
+  submitForm({ object: submitValues }).then((result) => {
     setShowSubmitConfirmation(true);
-    reexecuteQuery();
   });
 }
 
@@ -93,7 +87,6 @@ function getFormField(field, editing, currentValue, setChangeEvent) {
 
 export default function Form(props) {
   const [submitFormResult, submitForm] = useMutation(props.mutation.gql);
-  const [editing, setEditing] = React.useState(false);
   const [changeEvent, setChangeEvent] = React.useState(null);
   const [showSubmitConfirmation, setShowSubmitConfirmation] = React.useState(
     false
@@ -111,16 +104,6 @@ export default function Form(props) {
   // this state will be updated on any input change
   const [currentValues, setCurrentValues] = React.useState(initialValues);
 
-  const formData = props.data[0];
-
-  React.useEffect(() => {
-    setCurrentValues(cloneDeep(formData) || initialValues);
-  }, [formData]);
-
-  React.useEffect(() => {
-    setCurrentValues(cloneDeep(formData) || initialValues);
-  }, [editing]);
-
   React.useEffect(() => {
     // handle the change and set the current values
     handleChange(changeEvent, currentValues, setCurrentValues);
@@ -128,7 +111,7 @@ export default function Form(props) {
 
   const formFields = fields.map((field) => {
     const currentValue = currentValues[field.name] || "";
-    return getFormField(field, editing, currentValue, setChangeEvent);
+    return getFormField(field, true, currentValue, setChangeEvent);
   });
 
   const columns = groupFieldsIntoColumns(formFields, props.num_columns);
@@ -142,10 +125,7 @@ export default function Form(props) {
             currentValues,
             fields,
             submitForm,
-            props.mutation.idParam,
-            setEditing,
-            setShowSubmitConfirmation,
-            props.reexecuteQuery
+            setShowSubmitConfirmation
           )
         }
       >
@@ -158,40 +138,18 @@ export default function Form(props) {
             </Row>
           );
         })}
-        {editing && (
-          <>
-            <Button key="submit" variant="primary" type="submit">
-              <FaCheckCircle /> Save
-            </Button>
-            <Button
-              key="cancel"
-              variant="warning"
-              type="cancel"
-              onClick={(e) => {
-                setEditing(false);
-              }}
-            >
-              <FaTimesCircle /> Cancel
-            </Button>
-          </>
-        )}
+        <>
+          <Button key="submit" variant="primary" type="submit">
+            <FaCheckCircle /> Save
+          </Button>
+          <Button key="cancel" variant="warning" type="cancel">
+            <FaTimesCircle /> Cancel
+          </Button>
+        </>
         {showSubmitConfirmation && (
           <SubmitConfirmation
             setShowSubmitConfirmation={setShowSubmitConfirmation}
           />
-        )}
-        {!editing && (
-          <Button
-            key="edit"
-            variant="secondary"
-            onClick={(e) => {
-              setEditing(true);
-              setShowSubmitConfirmation(false);
-            }}
-            type="edit"
-          >
-            <FaEdit /> Edit
-          </Button>
         )}
       </BootstrapForm>
     </>

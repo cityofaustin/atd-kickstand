@@ -3,7 +3,6 @@ import { cloneDeep } from "lodash";
 import Col from "react-bootstrap/Col";
 import Row from "react-bootstrap/Row";
 import BootstrapTable from "react-bootstrap/Table";
-import Spinner from "react-bootstrap/Spinner";
 
 function generateHeaderRow(fields) {
   return (
@@ -19,10 +18,9 @@ function linkHandler(row, link) {
   for (let i = 0; i < link.use_params.length; i++) {
     const param = link.use_params[i];
     const val = row[param];
-    link.url = link.url.replace(`$${param}`, val);
+    const url = link.url.replace(`$${param}`, val);
+    row[link.name] = <a href={url}>{link.label}</a>;
   }
-
-  row[link.name] = <a href={link.url}>{link.label}</a>;
   return row;
 }
 
@@ -43,9 +41,11 @@ export default function Table(props) {
     links.map((link) => {
       const linkCol = { id: link.name, label: link.label, name: link.name };
       fields.push(linkCol);
+      return null;
     });
     links.map((link) => {
       rows = rows.map((row) => linkHandler(row, link));
+      return null;
     });
   }
 

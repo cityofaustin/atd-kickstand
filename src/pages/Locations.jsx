@@ -3,8 +3,10 @@ import Page from "../components/Page";
 import { Route } from "react-router-dom";
 import Header from "../components/Header";
 import Menu from "../components/Menu";
+import Form from "../components/InsertForm";
 import Table from "../components/Table";
 import Query from "../components/Query";
+import Modal from "../components/Modal";
 import CONFIG from "../config/config";
 
 export default function Locations() {
@@ -13,8 +15,11 @@ export default function Locations() {
     <Route {...pageConf.route}>
       <Header />
       <Page {...pageConf}>
-        <Query query={CONFIG.queries.locations}>
-          <Menu key={"1"} buttons={CONFIG.menus.locations.buttons} />
+          <Menu id="locations_menu" key="locations_menu" buttons={CONFIG.menus.locations.buttons} />
+          <Query query={CONFIG.queries.locations}>
+          <Modal hostMenuId="locations_menu" buttonId="modal_button_1" title="Cool!">
+            <Form {...CONFIG.forms.create_location} />
+          </Modal>
           <Table {...CONFIG.tables.locations} />
         </Query>
       </Page>

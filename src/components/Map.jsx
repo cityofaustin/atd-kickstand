@@ -1,8 +1,5 @@
 import React from "react";
-import ReactMapGL, {
-  Source,
-  Layer,
-} from "react-map-gl";
+import ReactMapGL, { Source, Layer } from "react-map-gl";
 
 const MAPBOX_TOKEN = `pk.eyJ1Ijoiam9obmNsYXJ5IiwiYSI6ImNrM29wNnB3dDAwcXEzY29zMTU5bWkzOWgifQ.KKvoz6s4NKNHkFVSnGZonw`;
 
@@ -54,7 +51,8 @@ class Map extends React.Component {
               "circle-radius": 12,
               "circle-color": "#eb3434",
               "circle-stroke-color": "white",
-              "circle-stroke-width": 2
+              "circle-stroke-width": 2,
+              "circle-opacity": 0.7,
             }}
           />
         </Source>

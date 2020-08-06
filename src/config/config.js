@@ -15,14 +15,14 @@ const CONFIG = {
     },
     locations: {
       title: "Locations",
-      route: { exact: true, strict: true, path: "/locations" },
+      route: { exact: true, path: "/locations" },
     },
   },
   menus: {
     locations: {
       buttons: [
         {
-          label: "Cool Button",
+          label: "Create Location",
           props: { variant: "secondary" },
         },
       ],
@@ -37,6 +37,53 @@ const CONFIG = {
     },
   },
   forms: {
+    create_location: {
+      action: "insert",
+      num_columns: 1,
+      mutation: {
+        gql: `mutation insert_single_location($object: locations_insert_input!) {
+          insert_locations_one(object: $object) {
+            id
+          }
+        }
+        `,
+        variables: ["object"]
+      },
+      fields: [
+        {
+          id: 2,
+          name: "location_name",
+          label: "Location Name",
+          data_type: "text",
+          read_only: false,
+          input_type: "text",
+        },
+        {
+          id: 3,
+          name: "landmark",
+          label: "Landmark",
+          data_type: "text",
+          read_only: false,
+          input_type: "text",
+        },
+        {
+          id: 4,
+          name: "latitude",
+          label: "Latitude",
+          input_type: "text",
+          data_type: "int",
+          read_only: false,
+        },
+        {
+          id: 5,
+          name: "longitude",
+          label: "Longitude",
+          input_type: "text",
+          data_type: "int",
+          read_only: false,
+        },
+      ],
+    },
     edit_location: {
       action: "edit",
       num_columns: 1,
@@ -92,7 +139,7 @@ const CONFIG = {
         }
       }
       `,
-        idParam: "id",
+        idParam: "id"
       },
     },
   },
@@ -101,7 +148,7 @@ const CONFIG = {
       title: "Locations",
       links: [
         {
-          name: "location_details",
+          name: "_location_details_",
           label: "Details",
           use_params: ["id"],
           url: "/locations/$id",
