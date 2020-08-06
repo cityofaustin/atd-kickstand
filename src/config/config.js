@@ -99,6 +99,14 @@ const CONFIG = {
   tables: {
     locations: {
       title: "Locations",
+      links: [
+        {
+          name: "location_details",
+          label: "Details",
+          use_params: ["id"],
+          url: "/locations/$id",
+        },
+      ],
       fields: [
         {
           id: 1,

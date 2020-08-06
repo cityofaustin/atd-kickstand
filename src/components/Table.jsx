@@ -1,4 +1,5 @@
 import React from "react";
+import { cloneDeep } from "lodash";
 import Col from "react-bootstrap/Col";
 import Row from "react-bootstrap/Row";
 import BootstrapTable from "react-bootstrap/Table";
@@ -14,21 +15,16 @@ function generateHeaderRow(fields) {
   );
 }
 
-// function linkHandler(row, link) {
-//   // create a link by updating the link's URL with properties from the row data
-//   // we clone these because the apollo returns restricted objects
-//   row = { ...row };
-//   link = { ...link };
+function linkHandler(row, link) {
+  for (let i = 0; i < link.use_params.length; i++) {
+    const param = link.use_params[i];
+    const val = row[param];
+    link.url = link.url.replace(`$${param}`, val);
+  }
 
-//   for (let i = 0; i < link.use_params.length; i++) {
-//     const param = link.use_params[i];
-//     const val = row[param];
-//     link.url = link.url.replace(`$${param}`, val);
-//   }
-
-//   row[link.id] = <a href={link.url}>{link.label}</a>;
-//   return row;
-// }
+  row[link.name] = <a href={link.url}>{link.label}</a>;
+  return row;
+}
 
 function handleValue(row, field) {
   // logic to stringify row value for table cell
@@ -37,24 +33,31 @@ function handleValue(row, field) {
 }
 
 export default function Table(props) {
-  // todo: we only support a single link object (not multiple "links")
-  // const links = props.data.links;
+  let rows = cloneDeep(props.data);
+  let fields = props.fields;
 
-  // if (links) {
-  //   const linkCol = {
-  //     field: { id: links.id, label: links.label, name: links.id },
-  //   };
-  //   fields.push(linkCol);
-  //   rows = rows.map((row) => linkHandler(row, links));
-  // }
+  // todo: not tested with multiple links
+  const links = props.links;
+
+  if (links !== undefined) {
+    links.map((link) => {
+      const linkCol = { id: link.name, label: link.label, name: link.name };
+      fields.push(linkCol);
+    });
+    links.map((link) => {
+      rows = rows.map((row) => linkHandler(row, link));
+    });
+  }
 
   return (
     <Row>
       <Col className="p-0">
         <BootstrapTable striped size="sm">
-          <thead className="thead-dark">{generateHeaderRow(props.fields)}</thead>
+          <thead className="thead-dark">
+            {generateHeaderRow(props.fields)}
+          </thead>
           <tbody>
-            {props.data.map((row, i) => {
+            {rows.map((row, i) => {
               return (
                 <tr key={i}>
                   {props.fields.map((field, i) => {
