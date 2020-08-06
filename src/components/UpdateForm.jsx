@@ -5,15 +5,9 @@ import Row from "react-bootstrap/Row";
 import Col from "react-bootstrap/Col";
 import BootstrapForm from "react-bootstrap/Form";
 import Button from "react-bootstrap/Button";
-import Spinner from "react-bootstrap/Spinner";
 import Alert from "react-bootstrap/Alert";
-import Autocomplete from "./Autocomplete";
+import { FaEdit, FaCheckCircle, FaTimesCircle } from "react-icons/fa";
 import FormField from "./FormField";
-
-function getErrorMessage(error) {
-  // see: https://www.apollographql.com/docs/react/data/error-handling/
-  return error.graphQLErrors.map((message) => message.message);
-}
 
 function filterByKeys(object, keys) {
   return Object.keys(object)
@@ -90,12 +84,10 @@ function SubmitConfirmation(props) {
 
 function GetFormData(props) {
   // TODO: handle errors/loading from this form data query
-  const param = props.param;
-  const match = props.match;
+  const variables = props.useVariables ? props.useVariables : {};
 
-  const variables = param && match ? { [param]: match } : {};
   const query = gql`
-    ${props.query}
+    ${props.query.gql}
   `;
 
   const { data, refetch } = useQuery(query, {
@@ -154,7 +146,6 @@ export default function Form(props) {
   });
 
   const [needsRefetch, setNeedsRefetch] = React.useState(false);
-
   // this state will be updated on any input change
   const [currentValues, setCurrentValues] = React.useState(initialValues);
 
@@ -172,6 +163,7 @@ export default function Form(props) {
   React.useEffect(() => {
     if (needsRefetch) {
       refetch();
+      setNeedsRefetch(false);
     }
   }, [needsRefetch]);
 
@@ -215,7 +207,7 @@ export default function Form(props) {
         {editing && (
           <>
             <Button variant="primary" type="submit">
-              Save
+              <FaCheckCircle /> Save
             </Button>
             <Button
               variant="warning"
@@ -224,7 +216,7 @@ export default function Form(props) {
                 setEditing(false);
               }}
             >
-              Cancel
+              <FaTimesCircle /> Cancel
             </Button>
           </>
         )}
@@ -242,7 +234,7 @@ export default function Form(props) {
             }}
             type="edit"
           >
-            Edit
+            <FaEdit /> Edit
           </Button>
         )}
       </BootstrapForm>

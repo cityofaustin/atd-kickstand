@@ -71,7 +71,7 @@ export default function FormField(props) {
 
   React.useEffect(() => {
     props.setChangeEvent(changeEvent);
-  }, [changeEvent]);
+  }, [changeEvent, props]);
 
   return (
     <React.Fragment key={props.field.name}>

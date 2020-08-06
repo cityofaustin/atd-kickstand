@@ -10,18 +10,17 @@ const client = new ApolloClient({
   cache: new InMemoryCache(),
 });
 
-
 function App() {
   return (
-    <Router>
-      <Switch>
-        <ApolloProvider client={client}>
-          <Home />
-          <Locations />
-          <LocationDetails/>
-        </ApolloProvider>
-      </Switch>
-    </Router>
+      <Router>
+        <Switch>
+          <ApolloProvider client={client}>
+            <Home />
+            <Locations />
+            <LocationDetails />
+          </ApolloProvider>
+        </Switch>
+      </Router>
   );
 }
 

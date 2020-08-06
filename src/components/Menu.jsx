@@ -8,9 +8,10 @@ export default function Menu(props) {
     <Row>
       <Col>
         {props.buttons.map((button) => {
+          const icon = button.icon ? button.icon : "";
           return (
             <Button key={button.label} className="mr-2" {...button.props}>
-              {button.label}
+              {icon} {button.label}
             </Button>
           );
         })}
