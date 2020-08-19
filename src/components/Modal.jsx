@@ -12,28 +12,43 @@ function getModalButton(id, handleShow) {
     </Button>
   );
 }
-export default function Modal(props) {
-  const [show, setShow] = React.useState(false);
-  const handleClose = () => setShow(false);
-  const handleShow = () => setShow(true);
-  const modalContent = props.children;
-  const modalButon = getModalButton(props.buttonId, handleShow);
-  const container = document.getElementById(props.hostMenuId);
+
+const thing = document.getElementById("locations_menu");
+
+class Modal extends React.Component {
+  constructor(props) {
+    super(props);
+    this.state = { show: false, hostMenuId: props.hostMenuId };
+    this.handleClose = () => {
+      this.setState({ show: false });
+    };
+    this.handleShow = () => {
+      this.setState({ show: true });
+    };
+    this.button = getModalButton(props.button_id, this.handleShow);
+  }
 
 
-  return (
-    <Row>
-      <Col>
-        <BootstrapModal show={show} onHide={handleClose}>
-          <BootstrapModal.Dialog>
-            <BootstrapModal.Header closeButton>
-              <BootstrapModal.Title>{props.title}</BootstrapModal.Title>
-            </BootstrapModal.Header>
-            {/* {container && ReactDOM.createPortal(<p>hello</p>, container)} */}
-            <BootstrapModal.Body>{modalContent}</BootstrapModal.Body>
-          </BootstrapModal.Dialog>
-        </BootstrapModal>
-      </Col>
-    </Row>
-  );
+  render() {
+    return (
+      <>
+        <Row>
+          <Col>{this.button}</Col>
+        </Row>
+        <Row>
+          <Col>
+            <BootstrapModal show={this.state.show} onHide={this.handleClose}>
+              <BootstrapModal.Header closeButton>
+                <BootstrapModal.Title>{this.props.title}</BootstrapModal.Title>
+              </BootstrapModal.Header>
+              {/* {container && ReactDOM.createPortal(<p>hello</p>, container)} */}
+              <BootstrapModal.Body>{this.props.children}</BootstrapModal.Body>
+            </BootstrapModal>
+          </Col>
+        </Row>
+      </>
+    );
+  }
 }
+
+export default Modal;

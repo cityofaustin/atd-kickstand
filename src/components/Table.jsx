@@ -3,6 +3,7 @@ import { cloneDeep } from "lodash";
 import Col from "react-bootstrap/Col";
 import Row from "react-bootstrap/Row";
 import BootstrapTable from "react-bootstrap/Table";
+import Container from "react-bootstrap/esm/Container";
 
 function generateHeaderRow(fields) {
   return (
@@ -50,13 +51,15 @@ export default function Table(props) {
   }
 
   return (
-    <Row>
-      <Col className="p-0">
-        <Row>
+    <>
+    <Row className="mb-2">
+
           <Col>
             <h2>{props.icon || ""} {props.title}</h2>
           </Col>
-        </Row>
+    </Row>
+    <Row className="mb-2">
+      <Col>
         <BootstrapTable striped size="sm">
           <thead className="thead-dark">
             {generateHeaderRow(props.fields)}
@@ -74,6 +77,7 @@ export default function Table(props) {
           </tbody>
         </BootstrapTable>
       </Col>
-    </Row>
+      </Row>
+      </>
   );
 }

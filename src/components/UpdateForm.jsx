@@ -5,7 +5,6 @@ import Row from "react-bootstrap/Row";
 import Col from "react-bootstrap/Col";
 import BootstrapForm from "react-bootstrap/Form";
 import Button from "react-bootstrap/Button";
-import Alert from "react-bootstrap/Alert";
 import { FaEdit, FaCheckCircle, FaTimesCircle } from "react-icons/fa";
 import FormField from "./FormField";
 
@@ -32,7 +31,7 @@ function handleSubmit(
   // reduce current values to only those fields which have been defined in the form
   const fieldKeys = fields.map((field) => field.name);
   const submitValues = filterByKeys(currentValues, fieldKeys);
-  submitForm({ object: submitValues, [idParam]: idVal }).then((result) => {
+  submitForm({ object: submitValues, [idParam]: idVal }).then(result => {
     setEditing(false);
     reexecuteQuery();
   });
@@ -109,59 +108,67 @@ export default function Form(props) {
   const columns = groupFieldsIntoColumns(formFields, props.num_columns);
 
   return (
-    <>
-      <BootstrapForm
-        onSubmit={(e) =>
-          handleSubmit(
-            e,
-            currentValues,
-            fields,
-            submitForm,
-            props.mutation.idParam,
-            setEditing,
-            props.reexecuteQuery
-          )
-        }
-      >
-        {columns.map((fields, i) => {
-          return (
-            <Row key={`form-row-${i}`}>
-              {fields.map((Field) => {
-                return Field;
+    <Row className="mb-2">
+      <Col>
+        <BootstrapForm
+          onSubmit={(e) =>
+            handleSubmit(
+              e,
+              currentValues,
+              fields,
+              submitForm,
+              props.mutation.idParam,
+              setEditing,
+              props.reexecuteQuery
+            )
+          }
+        >
+          <Row className="my-2">
+            <Col>
+              {editing && (
+                <>
+                  <Button key="submit" variant="primary" type="submit">
+                    <FaCheckCircle /> Save
+                  </Button>
+                  <Button
+                    key="cancel"
+                    className="mx-2"
+                    variant="warning"
+                    type="cancel"
+                    onClick={(e) => {
+                      setEditing(false);
+                    }}
+                  >
+                    <FaTimesCircle /> Cancel
+                  </Button>
+                </>
+              )}
+              {!editing && (
+                <Button
+                  key="edit"
+                  className="mx-2"
+                  variant="secondary"
+                  onClick={(e) => {
+                    setEditing(true);
+                  }}
+                  type="edit"
+                >
+                  <FaEdit /> Edit
+                </Button>
+              )}
+              {columns.map((fields, i) => {
+                return (
+                  <Row key={`form-row-${i}`}>
+                    {fields.map((Field) => {
+                      return Field;
+                    })}
+                  </Row>
+                );
               })}
-            </Row>
-          );
-        })}
-        {editing && (
-          <>
-            <Button key="submit" variant="primary" type="submit">
-              <FaCheckCircle /> Save
-            </Button>
-            <Button
-              key="cancel"
-              variant="warning"
-              type="cancel"
-              onClick={(e) => {
-                setEditing(false);
-              }}
-            >
-              <FaTimesCircle /> Cancel
-            </Button>
-          </>
-        )}
-        {!editing && (
-          <Button
-            key="edit"
-            variant="secondary"
-            onClick={(e) => {
-              setEditing(true);
-            }}
-            type="edit"
-          >
-            <FaEdit /> Edit
-          </Button>
-        )}
-      </BootstrapForm>
-    </>
+            </Col>
+          </Row>
+        </BootstrapForm>
+      </Col>
+    </Row>
   );
 }

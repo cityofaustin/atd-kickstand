@@ -12,6 +12,7 @@ export default function Query(props) {
   });
 
   if (result === undefined) {
+    // not sure why this case happens, but it does
     return null;
   }
 
@@ -26,13 +27,10 @@ export default function Query(props) {
 
   if (error) return <p>Oh no... {error.message}</p>;
 
-  const kiddos = React.Children.map(props.children, (child) => {
-    const propsData = data;
+  return React.Children.map(props.children, (child) => {
     return React.cloneElement(child, {
-      data: propsData,
+      data: data,
       reexecuteQuery: reexecuteQuery,
     });
   });
-
-  return kiddos;
 }

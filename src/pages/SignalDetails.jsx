@@ -9,7 +9,7 @@ import Table from "../components/Table";
 import CONFIG from "../config/config";
 
 export default function LocationDetails() {
-  const pageConf = CONFIG.pages.location_details;
+  const pageConf = CONFIG.pages.signal_details;
   let match = useRouteMatch({ path: pageConf.route.path, exact: true });
 
   if (match === null) {
@@ -21,12 +21,10 @@ export default function LocationDetails() {
   return (
     <Page {...pageConf}>
       <Query
-        query={CONFIG.queries.location_details}
+        query={CONFIG.queries.signal_details}
         useVariables={useVariables}
       >
-        <Map root_key={"locations"} />
-        <Form root_key={"locations"} {...CONFIG.forms.edit_location} />
-        <Table root_key={"signals"} {...CONFIG.tables.signals_at_location} />
+        <Form root_key={"signals"} {...CONFIG.forms.edit_signal} />
       </Query>
     </Page>
   );

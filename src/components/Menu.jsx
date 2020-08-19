@@ -5,7 +5,7 @@ import Button from "react-bootstrap/Button";
 
 export default function Menu(props) {
   return (
-    <Row>
+    <Row className="mb-2">
       <Col id={props.id}>
         {props.buttons.map((button) => {
           const icon = button.icon ? button.icon : "";

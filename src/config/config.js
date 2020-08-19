@@ -1,21 +1,44 @@
 import React from "react";
-import { FaMapMarkerAlt, FaTrafficLight } from "react-icons/fa";
+import {
+  FaMapMarkerAlt,
+  FaTrafficLight,
+  FaPlusCircle,
+  FaHome,
+} from "react-icons/fa";
 
 const CONFIG = {
   pages: {
+    home: {
+      title: "Home",
+      route: { exact: true, path: "/" },
+      icon: <FaHome />,
+      showNav: true,
+    },
+    locations: {
+      title: "Locations",
+      route: { exact: true, path: "/locations" },
+      icon: <FaMapMarkerAlt />,
+      showNav: true,
+    },
     location_details: {
       title: "Location Details",
       icon: <FaMapMarkerAlt />,
       route: { path: "/locations/:id" },
       matchParam: "id",
+      showNav: false,
     },
-    home: {
-      title: "Home",
-      route: { exact: true, path: "/" },
+    signals: {
+      title: "Signals",
+      icon: <FaTrafficLight />,
+      route: { exact: true, path: "/signals" },
+      showNav: true,
     },
-    locations: {
-      title: "Locations",
-      route: { exact: true, path: "/locations" },
+    signal_details: {
+      title: "Signal Details",
+      icon: <FaTrafficLight />,
+      route: { path: "/signals/:id" },
+      matchParam: "id",
+      showNav: false,
     },
   },
   menus: {
@@ -23,6 +46,7 @@ const CONFIG = {
       buttons: [
         {
           label: "Create Location",
+          icon: <FaPlusCircle />,
           props: { variant: "secondary" },
         },
       ],
@@ -128,6 +152,49 @@ const CONFIG = {
           data_type: "int",
           read_only: false,
         },
+        {
+          id: 6,
+          name: "updated_at",
+          label: "Updated",
+          input_type: "text",
+          data_type: "text",
+          read_only: true,
+        },
+      ],
+      mutation: {
+        gql: `mutation update_locations($id: Int, $object: locations_set_input) {
+        update_locations(where: {id: {_eq: $id}}, _set: $object) {
+          affected_rows
+          returning {
+            id
+          }
+        }
+      }
+      `,
+        idParam: "id",
+      },
+    },
+    edit_signal: {
+      action: "edit",
+      num_columns: 1,
+      fields: [
+        {
+          id: 1,
+          name: "id",
+          label: "ID",
+          data_type: "text",
+          read_only: true,
+          input_type: "text",
+        },
+        {
+          id: 2,
+          name: "type",
+          label: "Type",
+          data_type: "text",
+          read_only: false,
+          input_type: "select",
+          options: ["Traffic", "Pedestrian"],
+        },
       ],
       mutation: {
         gql: `mutation update_locations($id: Int, $object: locations_set_input) {
@@ -177,7 +244,7 @@ const CONFIG = {
     },
     signals_at_location: {
       title: "Signals",
-      icon: <FaTrafficLight/>,
+      icon: <FaTrafficLight />,
       fields: [
         {
           id: 1,
@@ -207,9 +274,19 @@ const CONFIG = {
         latitude
         longitude
         council_district
+        updated_at
       },
       signals(where: {location_id: {_eq: $id}}) { id location_id type }
     }`,
+      variables: ["id"],
+    },
+    signal_details: {
+      gql: `query SignalDetails($id: Int!) {
+        signals(where: {id: {_eq: $id}}) {
+          id
+          type
+        }
+      }`,
       variables: ["id"],
     },
   },

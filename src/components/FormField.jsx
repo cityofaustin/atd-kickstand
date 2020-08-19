@@ -79,7 +79,12 @@ export default function FormField(props) {
         <b>{props.field.label}</b>
       </Form.Label>
       <Col>
-        {<Component {...componentProps} />}
+        <Component {...componentProps}>
+          {props.field.options &&
+            props.field.options.map(option => {
+              return <option key={option}>{option}</option>;
+            })}
+        </Component>
         {props.editing && (
           <Form.Text className="text-muted">
             {props.field.helper_text}
