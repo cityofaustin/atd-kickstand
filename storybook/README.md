@@ -1,3 +1,37 @@
+# ATD DTS ADMIN COMPONENTS & THEME
+
+### [Visit the Component Documentation here](https://5f3da07f2d377100223182dd-fdlsdzujeh.chromatic.com/)
+
+Our Storybook instance is hosted on Chromatic. [Here is Storybook deployment documentation.](https://www.learnstorybook.com/intro-to-storybook/react/en/deploy/)
+
+## Running locally
+
+`yarn storybook`
+
+http://localhost:6006/
+
+### Test
+
+`yarn test`
+
+### Generate static build
+
+`yarn build-storybook`
+
+## Developing components
+
+1. Create a React component and test file in `/src/components`
+2. Create a storybook file in `src/stories`
+
+## TODO
+
+- [ ] Set up Github Action to auto deploy updates.
+- [ ] Explore how to import component library into other repositories and projects.
+- [ ] Learn more about Chromatic deployment and hosting
+- [ ] Starting making MOPED components!!
+
+---
+
 This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
 
 ## Available Scripts
