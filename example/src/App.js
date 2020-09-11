@@ -1,10 +1,10 @@
-import React from 'react'
+import React from "react";
 
-import { ExampleComponent } from 'atd-kickstand'
-import 'atd-kickstand/dist/index.css'
+import { Hi } from "atd-kickstand";
+import "atd-kickstand/dist/index.css";
 
 const App = () => {
-  return <ExampleComponent text="Create React Library Example 😄" />
-}
+  return <Hi data={{ state: "DARK" }} />;
+};
 
-export default App
+export default App;
