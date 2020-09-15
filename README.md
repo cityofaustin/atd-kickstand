@@ -29,6 +29,31 @@ class Example extends Component {
 }
 ```
 
+### Importing in a separate repository for local development
+
+To develop locally and import into another local target repository, clone this repository and navigate to the project folder. Then, run:
+
+`npm link`
+
+For the target app, navigate to the project folder of the app you want to develop within and add `atd-kickstand` as a dependency in `package.json` (if it is not already a dependency). Then, run:
+
+`npm link atd-kickstand`
+
+To unlink:
+**Note that `unlink` is an alias of `uninstall`**
+
+a. If the target app already had this package as a dependency, you need to unlink the local package and reinstall from the npm registry. To do this, run:
+
+`npm unlink --no-save atd-kickstand && npm install`
+
+b. If the target app did not already have this package as a dependency, you need remove the dependency from `package.json` and unlink the local package. To do this, run:
+
+`npm unlink --no-save atd-kickstand`
+
+In either case, finish by unlinking `atd-kickstand` by navigating to the project folder of this repository. Then, run:
+
+`npm unlink`
+
 ---
 
 ## Storybook

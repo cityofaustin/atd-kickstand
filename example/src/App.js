@@ -1,10 +1,15 @@
 import React from "react";
 
-import { Hi } from "atd-kickstand";
+import { Hi, ExampleComponent } from "atd-kickstand";
 import "atd-kickstand/dist/index.css";
 
 const App = () => {
-  return <Hi data={{ state: "DARK" }} />;
+  return (
+    <>
+      <ExampleComponent text={"Hello!"} />
+      <Hi data={{ state: "DARK" }} />
+    </>
+  );
 };
 
 export default App;
