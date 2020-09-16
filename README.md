@@ -42,13 +42,13 @@ For the target app, navigate to the project folder of the app you want to develo
 To unlink:
 **Note that `unlink` is an alias of `uninstall`**
 
-a. If the target app already had this package as a dependency, you need to unlink the local package and reinstall from the npm registry. To do this, run:
+a. If the target app already had this package as a dependency, you need to unlink the local package and reinstall from the npm registry (the `--no-save` flag will prevent you from removing the dependency from `package.json`). To do this, run:
 
 `npm unlink --no-save atd-kickstand && npm install`
 
-b. If the target app did not already have this package as a dependency, you need remove the dependency from `package.json` and unlink the local package. To do this, run:
+b. If the target app did not already have this package as a dependency, you need unlink the local package and remove the dependency from `package.json`. To do this, run:
 
-`npm unlink --no-save atd-kickstand`
+`npm unlink atd-kickstand`
 
 In either case, finish by unlinking `atd-kickstand` by navigating to the project folder of this repository. Then, run:
 
