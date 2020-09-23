@@ -1,6 +1,6 @@
 # ATD DTS ADMIN COMPONENTS & THEME
 
-### [Visit the Component Documentation (aka Storybook) here](https://5f3da07f2d377100223182dd-fdlsdzujeh.chromatic.com/)
+### [Visit the Component Documentation (aka Storybook) here](https://master--5f3da07f2d377100223182dd.chromatic.com/)
 
 Our Storybook instance is hosted on Chromatic. [Here is Storybook deployment documentation.](https://www.learnstorybook.com/intro-to-storybook/react/en/deploy/)
 
@@ -79,8 +79,6 @@ http://localhost:6006/
 
 ### TODO
 
-- [ ] Set up Github Action to auto deploy updates.
-- [ ] Explore how to import component library into other repositories and projects.
 - [ ] Learn more about Chromatic deployment and hosting
 - [ ] Starting making MOPED components!!
 
