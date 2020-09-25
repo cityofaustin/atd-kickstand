@@ -29,6 +29,19 @@ class Example extends Component {
 }
 ```
 
+### Local Development
+
+Local development involves running rollup in watch mode from the root project folder and running the built-in React app in `/example/` concurrently. This will automatically compile new changes to the library in to `/dist/` folder and make them available for import in the example app.
+
+To run rollup in watch mode, in the root project folder, run:
+
+`npm start`
+
+Then, to start the example app developement server in a separate tab or terminal, run:
+
+`cd example`
+`npm start`
+
 ### Importing in a separate repository for local development
 
 To develop locally and import into another local target repository, clone this repository and navigate to the project folder. Then, run:
@@ -76,11 +89,6 @@ http://localhost:6006/
 
 1. Create a React component and test file in `/src/components`
 2. Create a storybook file in `src/stories`
-
-### TODO
-
-- [ ] Learn more about Chromatic deployment and hosting
-- [ ] Starting making MOPED components!!
 
 ---
 
