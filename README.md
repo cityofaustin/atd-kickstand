@@ -40,32 +40,16 @@ To run rollup in watch mode, in the root project folder, run:
 Then, to start the example app developement server in a separate tab or terminal, run:
 
 `cd example`
+`npm install`
 `npm start`
 
 ### Importing in a separate repository for local development
 
-To develop locally and import into another local target repository, clone this repository and navigate to the project folder. Then, run:
+To import this library into another local repository, run:
 
-`npm link`
+`npm install --save cityofaustin/atd-kickstand#<branch name>`
 
-For the target app, navigate to the project folder of the app you want to develop within and add `atd-kickstand` as a dependency in `package.json` (if it is not already a dependency). Then, run:
-
-`npm link atd-kickstand`
-
-To unlink:
-**Note that `unlink` is an alias of `uninstall`**
-
-a. If the target app already had this package as a dependency, you need to unlink the local package and reinstall from the npm registry (the `--no-save` flag will prevent you from removing the dependency from `package.json`). To do this, run:
-
-`npm unlink --no-save atd-kickstand && npm install`
-
-b. If the target app did not already have this package as a dependency, you need unlink the local package and remove the dependency from `package.json`. To do this, run:
-
-`npm unlink atd-kickstand`
-
-In either case, finish by unlinking `atd-kickstand` by navigating to the project folder of this repository. Then, run:
-
-`npm unlink`
+The branch name can point to `main` or another branch that you are developing.
 
 ---
 
