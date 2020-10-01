@@ -40,7 +40,7 @@ To run rollup in watch mode, in the root project folder, run:
 Then, to start the example app developement server in a separate tab or terminal, run:
 
 `cd example`
-`npm install`
+`npm install` (only first time)
 `npm start`
 
 ### Importing in a separate repository for local development
