@@ -1,7 +1,7 @@
 import React from "react";
 import { action } from "@storybook/addon-actions";
 
-import Hi from "../components/Hi";
+import { Hi } from "../components/Hi";
 
 export default {
   component: Hi,
