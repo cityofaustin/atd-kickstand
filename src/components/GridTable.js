@@ -377,7 +377,6 @@ const GridTable = ({
 
   // Show us the current state of the query in the console!
   console.log(query.query);
-  console.log("Kickstand, baby");
 
   /**
    *
@@ -552,16 +551,4 @@ const GridTable = ({
   );
 };
 
-// const GridTable = ({ data }) => (
-//   <h1
-//     style={{
-//       backgroundColor: data.state === "DARK" ? "black" : "white",
-//       color: data.state === "DARK" ? "gray" : "black",
-//     }}
-//   >
-//     GridTable 5
-//   </h1>
-// );
-
-// export default GridTable;
 export default withApollo(GridTable);
