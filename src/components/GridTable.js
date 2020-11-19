@@ -563,8 +563,5 @@ const GridTable = ({
 //   </h1>
 // );
 
-// Is this line necessary?
-GridTable.propTypes = {};
-
 // export default GridTable;
 export default withApollo(GridTable);
