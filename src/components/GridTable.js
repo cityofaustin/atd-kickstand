@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
-import { useQuery, useLazyQuery } from "@apollo/react-hooks";
+import { useQuery, useLazyQuery, ApolloProvider } from "@apollo/react-hooks";
 
 import { withApollo } from "react-apollo";
 import moment from "moment";
@@ -428,126 +428,128 @@ const GridTable = ({
   }
 
   return (
-    <div className="animated fadeIn">
-      <Row>
-        <Col>
-          <Card>
-            <CardHeader>
-              <i className="fa fa-car" /> {title}
-            </CardHeader>
-            <CardBody>
-              {filters && (
-                <GridTableFilterBadges
-                  searchParams={searchParameters}
-                  dateRangeParams={dateRangeFilter}
-                  advancedFilterParams={filterOptions}
-                  advancedFiltersConfig={filters}
-                />
-              )}
-              <Row>
-                {!!aggData &&
-                  !!chartData &&
-                  chartConfig.map((chart, i) => {
-                    if (chart.type === "horizontal") {
-                      return (
-                        <Col key={i} md="6">
-                          <GridTableHorizontalBar
-                            chartData={chartData}
-                            chartConfig={chart}
-                          />
-                        </Col>
-                      );
-                    } else if (chart.type === "doughnut") {
-                      return (
-                        <Col key={i} md="6">
-                          <GridTableDoughnut
-                            chartData={chartData}
-                            chartConfig={chart}
-                          />
-                        </Col>
-                      );
-                    } else {
-                      return null;
-                    }
-                  })}
-              </Row>
-              {aggregateQueryConfig && widgetsConfig && (
+    <ApolloProvider>
+      <div className="animated fadeIn">
+        <Row>
+          <Col>
+            <Card>
+              <CardHeader>
+                <i className="fa fa-car" /> {title}
+              </CardHeader>
+              <CardBody>
+                {filters && (
+                  <GridTableFilterBadges
+                    searchParams={searchParameters}
+                    dateRangeParams={dateRangeFilter}
+                    advancedFilterParams={filterOptions}
+                    advancedFiltersConfig={filters}
+                  />
+                )}
                 <Row>
-                  <GridTableWidgets
-                    aggData={aggData}
-                    widgetsConfig={widgetsConfig}
+                  {!!aggData &&
+                    !!chartData &&
+                    chartConfig.map((chart, i) => {
+                      if (chart.type === "horizontal") {
+                        return (
+                          <Col key={i} md="6">
+                            <GridTableHorizontalBar
+                              chartData={chartData}
+                              chartConfig={chart}
+                            />
+                          </Col>
+                        );
+                      } else if (chart.type === "doughnut") {
+                        return (
+                          <Col key={i} md="6">
+                            <GridTableDoughnut
+                              chartData={chartData}
+                              chartConfig={chart}
+                            />
+                          </Col>
+                        );
+                      } else {
+                        return null;
+                      }
+                    })}
+                </Row>
+                {aggregateQueryConfig && widgetsConfig && (
+                  <Row>
+                    <GridTableWidgets
+                      aggData={aggData}
+                      widgetsConfig={widgetsConfig}
+                    />
+                  </Row>
+                )}
+                <Row>
+                  <GridTableSearch
+                    query={query}
+                    clearFilters={clearFilters}
+                    searchParameters={searchParameters}
+                    setSearchParameters={setSearchParameters}
+                    resetPage={resetPageOnSearch}
+                    filters={filters}
+                    toggleAdvancedFilters={toggleAdvancedFilters}
+                  />
+                  <GridFilters
+                    isCollapsed={collapseAdvancedFilters}
+                    filters={filters}
+                    filterOptionsState={filterOptions}
+                    setFilterOptions={setFilterOptions}
+                    resetPageOnSearch={resetPageOnSearch}
                   />
                 </Row>
-              )}
-              <Row>
-                <GridTableSearch
-                  query={query}
-                  clearFilters={clearFilters}
-                  searchParameters={searchParameters}
-                  setSearchParameters={setSearchParameters}
-                  resetPage={resetPageOnSearch}
-                  filters={filters}
-                  toggleAdvancedFilters={toggleAdvancedFilters}
-                />
-                <GridFilters
-                  isCollapsed={collapseAdvancedFilters}
-                  filters={filters}
-                  filterOptionsState={filterOptions}
-                  setFilterOptions={setFilterOptions}
-                  resetPageOnSearch={resetPageOnSearch}
-                />
-              </Row>
-              <ButtonToolbar className="mb-3 justify-content-between">
-                {hasDateRange && (
-                  <ButtonGroup>
-                    <GridDateRange
-                      setDateRangeFilter={setDateRangeFilter}
-                      initStartDate={dateRangeFilter.startDate}
-                      initEndDate={dateRangeFilter.endDate}
-                      uniqueKey={query.table}
-                    />
-                  </ButtonGroup>
-                )}
-
-                <ButtonGroup className="mb-2 float-right">
-                  <GridTablePagination
-                    moveNext={moveNextPage}
-                    moveBack={moveBackPage}
-                    pageNumber={page}
-                    limit={limit}
-                    totalRecords={totalRecords}
-                    totalPages={totalPages}
-                    handleRowClick={handleRowClick}
-                  />
-
-                  {columnsToExport && (
-                    <GridExportData
-                      query={query}
-                      columnsToExport={columnsToExport}
-                      totalRecords={totalRecords}
-                    />
+                <ButtonToolbar className="mb-3 justify-content-between">
+                  {hasDateRange && (
+                    <ButtonGroup>
+                      <GridDateRange
+                        setDateRangeFilter={setDateRangeFilter}
+                        initStartDate={dateRangeFilter.startDate}
+                        initEndDate={dateRangeFilter.endDate}
+                        uniqueKey={query.table}
+                      />
+                    </ButtonGroup>
                   )}
-                </ButtonGroup>
-              </ButtonToolbar>
-              {loading ? (
-                <Spinner className="mt-2" color="primary" />
-              ) : (
-                <Table responsive>
-                  <GridTableHeader
-                    query={query}
-                    handleTableHeaderClick={handleTableHeaderClick}
-                    sortColumn={sortColumn}
-                    sortOrder={sortOrder}
-                    helperText={helperText}
-                  />
-                  <tbody>{data && dataEntries}</tbody>
-                </Table>
-              )}
-            </CardBody>
-          </Card>
-        </Col>
-      </Row>
-    </div>
+
+                  <ButtonGroup className="mb-2 float-right">
+                    <GridTablePagination
+                      moveNext={moveNextPage}
+                      moveBack={moveBackPage}
+                      pageNumber={page}
+                      limit={limit}
+                      totalRecords={totalRecords}
+                      totalPages={totalPages}
+                      handleRowClick={handleRowClick}
+                    />
+
+                    {columnsToExport && (
+                      <GridExportData
+                        query={query}
+                        columnsToExport={columnsToExport}
+                        totalRecords={totalRecords}
+                      />
+                    )}
+                  </ButtonGroup>
+                </ButtonToolbar>
+                {loading ? (
+                  <Spinner className="mt-2" color="primary" />
+                ) : (
+                  <Table responsive>
+                    <GridTableHeader
+                      query={query}
+                      handleTableHeaderClick={handleTableHeaderClick}
+                      sortColumn={sortColumn}
+                      sortOrder={sortOrder}
+                      helperText={helperText}
+                    />
+                    <tbody>{data && dataEntries}</tbody>
+                  </Table>
+                )}
+              </CardBody>
+            </Card>
+          </Col>
+        </Row>
+      </div>
+    </ApolloProvider>
   );
 };
 
