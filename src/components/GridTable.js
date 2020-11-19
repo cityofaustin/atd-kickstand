@@ -2,7 +2,7 @@ import React, { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import { useQuery, useLazyQuery } from "@apollo/react-hooks";
 
-// import { withApollo } from "react-apollo";
+import { withApollo } from "react-apollo";
 import moment from "moment";
 
 import {
@@ -551,5 +551,4 @@ const GridTable = ({
   );
 };
 
-// export default withApollo(GridTable);
-export default GridTable;
+export default withApollo(GridTable);
