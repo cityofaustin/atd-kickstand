@@ -1,8 +1,8 @@
 import React, { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
-import { useQuery, useLazyQuery, ApolloProvider } from "@apollo/react-hooks";
+import { useQuery, useLazyQuery } from "@apollo/react-hooks";
 
-import { withApollo } from "react-apollo";
+// import { withApollo } from "react-apollo";
 import moment from "moment";
 
 import {
@@ -428,7 +428,6 @@ const GridTable = ({
   }
 
   return (
-    <ApolloProvider>
       <div className="animated fadeIn">
         <Row>
           <Col>
@@ -549,8 +548,8 @@ const GridTable = ({
           </Col>
         </Row>
       </div>
-    </ApolloProvider>
   );
 };
 
-export default withApollo(GridTable);
+// export default withApollo(GridTable);
+export default GridTable;
