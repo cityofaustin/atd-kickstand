@@ -427,8 +427,6 @@ const GridTable = ({
     );
   }
 
-  console.log(data);
-
   return (
       <div className="animated fadeIn">
         <Row>
