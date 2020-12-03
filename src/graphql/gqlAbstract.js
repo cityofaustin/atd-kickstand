@@ -1,6 +1,6 @@
 import { gql } from "apollo-boost";
 
-class gqlAbstract {
+class GQLAbstract {
   /**
    * Primes the internal configuration for rendering.
    *
@@ -350,6 +350,14 @@ class gqlAbstract {
   }
 
   /**
+   * Returns the showDateRange configuration value as a boolean.
+   * @return {boolean}
+   */
+  get showDateRange() {
+    return this.config.showDateRange || false;
+  }
+
+  /**
    * Generates the filters section and injects the abstract with finished GraphQL syntax.
    * @params {bool} aggregate - True if this is an aggregate filter
    * @returns {string}
@@ -616,4 +624,4 @@ class gqlAbstract {
   }
 }
 
-export default gqlAbstract;
+export default GQLAbstract;
