@@ -234,3 +234,45 @@ test("isNestedKey works in all cases", () => {
   // Numeric only keys
   expect(gqlAbstractGlobalInstance.isNestedKey("123456798")).toEqual(false);
 });
+
+/**
+ * Tests getExpKey method
+ */
+test("getExpKey works in all cases", () => {
+  // Test each group
+  expect(gqlAbstractGlobalInstance.getExpKey(nestedKeys[0])).toEqual(
+    "collision"
+  );
+  expect(gqlAbstractGlobalInstance.getExpKey(nestedKeys[1])).toEqual("units");
+  expect(gqlAbstractGlobalInstance.getExpKey(nestedKeys[2])).toEqual(
+    "geocode_method"
+  );
+
+  expect(gqlAbstractGlobalInstance.getExpKey(nonNestedKeys[0])).toEqual(
+    "address_confirmed_secondary"
+  );
+  expect(gqlAbstractGlobalInstance.getExpKey(nonNestedKeys[1])).toEqual(
+    "sus_serious_injry_cnt"
+  );
+  expect(gqlAbstractGlobalInstance.getExpKey(nonNestedKeys[2])).toEqual(
+    "atd_fatality_count"
+  );
+
+  // Edge Cases:
+  // Incomplete nested keys
+  expect(gqlAbstractGlobalInstance.getExpKey("collision { ")).toEqual(
+    "collision"
+  );
+  // Empty keys
+  expect(gqlAbstractGlobalInstance.getExpKey("")).toEqual("");
+  // Undefined keys
+  expect(() => {
+    gqlAbstractGlobalInstance.getExpKey(undefined);
+  }).toThrow(TypeError);
+  // Space only keys
+  expect(gqlAbstractGlobalInstance.getExpKey("       ")).toEqual("");
+  // Numeric only keys
+  expect(gqlAbstractGlobalInstance.getExpKey("123456798{}")).toEqual(
+    "123456798"
+  );
+});
