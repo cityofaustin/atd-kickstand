@@ -1,6 +1,18 @@
 import GQLAbstract from "./GQLAbstract";
 import { test } from "@jest/globals";
 
+const nestedKeys = [
+  "collision { collsn_desc }",
+  "units { unit_description { veh_unit_desc_desc } }",
+  "geocode_method { name }",
+];
+
+const nonNestedKeys = [
+  "address_confirmed_secondary",
+  "sus_serious_injry_cnt",
+  "atd_fatality_count",
+];
+
 const testGqlConfiguration = {
   table: "atd_txdot_crashes",
   single_item: "crashes",
@@ -194,4 +206,31 @@ test("The class generates correct query", () => {
   // Generate the query in the class, and compare against expected value
   const instanceQuery = gqlAbstractGlobalInstance.query;
   expect(instanceQuery).toEqual(finalQueryGraphQL);
+});
+
+/**
+ * Tests isNestedKey
+ */
+test("isNestedKey works in all cases", () => {
+  // Test each group
+  nestedKeys.forEach((key) => {
+    expect(gqlAbstractGlobalInstance.isNestedKey(key)).toEqual(true);
+  });
+  nonNestedKeys.forEach((key) => {
+    expect(gqlAbstractGlobalInstance.isNestedKey(key)).toEqual(false);
+  });
+
+  // Edge Cases:
+  // Incomplete nested keys
+  expect(gqlAbstractGlobalInstance.isNestedKey("collision { ")).toEqual(true);
+  // Empty keys
+  expect(gqlAbstractGlobalInstance.isNestedKey("")).toEqual(true);
+  // Undefined keys
+  expect(() => {
+    gqlAbstractGlobalInstance.isNestedKey(undefined);
+  }).toThrow(TypeError);
+  // Space only keys
+  expect(gqlAbstractGlobalInstance.isNestedKey("       ")).toEqual(true);
+  // Numeric only keys
+  expect(gqlAbstractGlobalInstance.isNestedKey("123456798")).toEqual(false);
 });
