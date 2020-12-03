@@ -123,3 +123,24 @@ test("The constructor should work", () => {
   // Check on the showDateRange to be true
   expect(gqlAbstractGlobalInstance.showDateRange).toEqual(true);
 });
+
+/**
+ * Tests if the columns set up in the configuration are present in the object
+ */
+test("The column fields should load", () => {
+  // Crash ID
+  const columns = gqlAbstractGlobalInstance.columns;
+  expect(columns.includes("crash_id")).toEqual(true);
+  expect(columns.includes("case_id")).toEqual(true);
+  expect(columns.includes("crash_date")).toEqual(true);
+  expect(columns.includes("address_confirmed_primary")).toEqual(true);
+  expect(columns.includes("address_confirmed_secondary")).toEqual(true);
+  expect(columns.includes("sus_serious_injry_cnt")).toEqual(true);
+  expect(columns.includes("atd_fatality_count")).toEqual(true);
+  expect(columns.includes("est_comp_cost")).toEqual(true);
+  expect(columns.includes("collision { collsn_desc } ")).toEqual(true);
+  expect(
+    columns.includes("units { unit_description { veh_unit_desc_desc } }")
+  ).toEqual(true);
+  expect(columns.includes("geocode_method { name }")).toEqual(true);
+});
