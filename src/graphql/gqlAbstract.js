@@ -38,7 +38,7 @@ class GQLAbstract {
   }
 
   /**
-   * Returns true if the input string is a valid alphanumeric object key
+   * Returns false if the input string is a valid alphanumeric object key
    * @param {string} input - The string to be tested
    * @returns {boolean}
    */
@@ -55,7 +55,7 @@ class GQLAbstract {
 
   /**
    * Returns the value of a nested expression, usually another expression.
-   * @param {string} exp - The GraphQL expressoin
+   * @param {string} exp - The GraphQL expression
    * @returns {string}
    */
   getExpValue = (exp) =>
@@ -92,7 +92,7 @@ class GQLAbstract {
 
   /**
    * Sets the limit of the current query
-   * @param {integer} limit - the numer you want to use for a limit
+   * @param {integer} limit - the number you want to use for a limit
    */
   set limit(limit) {
     this.config.limit = limit;
