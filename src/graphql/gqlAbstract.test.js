@@ -144,3 +144,16 @@ test("The column fields should load", () => {
   ).toEqual(true);
   expect(columns.includes("geocode_method { name }")).toEqual(true);
 });
+
+/**
+ * Tests if the columns set up in the configuration are present in the object
+ */
+test("The sort/order settings must load", () => {
+  // First gather the values, then test the expected values...
+  const orderBy = gqlAbstractGlobalInstance.getEntries("order_by")[0];
+  const where = gqlAbstractGlobalInstance.getEntries("where")[0];
+  expect(orderBy[0]).toEqual("est_comp_cost");
+  expect(orderBy[1]).toEqual("desc");
+  expect(where[0]).toEqual("location_id");
+  expect(where[1]).toEqual('_eq: "1"');
+});
