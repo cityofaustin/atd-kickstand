@@ -1,4 +1,5 @@
 import GQLAbstract from "./GQLAbstract";
+import { test } from "@jest/globals";
 
 const testGqlConfiguration = {
   table: "atd_txdot_crashes",
@@ -89,7 +90,6 @@ const testGqlConfiguration = {
 };
 
 const gqlAbstractGlobalInstance = new GQLAbstract(testGqlConfiguration);
-console.log(gqlAbstractGlobalInstance.config);
 
 /**
  * Checks if the configuration will load...
@@ -109,7 +109,7 @@ test("The constructor should work", () => {
       ) {
         aggregate {
           count
-        } 
+        }
       }
     }`);
   // Check on the limit
