@@ -59,7 +59,7 @@ const testGqlConfiguration = {
       label_table: "Est Comprehensive Cost",
       type: "Currency",
     },
-    "collision { collsn_desc } ": {
+    "collision { collsn_desc }": {
       searchable: false,
       sortable: true,
       label_table: "Collision Description",
@@ -88,6 +88,35 @@ const testGqlConfiguration = {
   limit: 25,
   offset: 0,
 };
+
+const finalQueryGraphQL = `{
+      atd_txdot_crashes (
+          limit: 25,
+offset: 0,
+where: {location_id: {_eq: "1"}},
+order_by: {est_comp_cost: desc}
+      ) {
+          crash_id
+case_id
+crash_date
+address_confirmed_primary
+address_confirmed_secondary
+sus_serious_injry_cnt
+atd_fatality_count
+est_comp_cost
+collision { collsn_desc }
+units { unit_description { veh_unit_desc_desc } }
+geocode_method { name }
+      },
+      atd_txdot_crashes_aggregate (
+          where: {location_id: {_eq: "1"}},
+order_by: {est_comp_cost: desc}
+      ) {
+        aggregate {
+          count
+        }
+      }
+    }`;
 
 const gqlAbstractGlobalInstance = new GQLAbstract(testGqlConfiguration);
 
@@ -138,7 +167,7 @@ test("The column fields should load", () => {
   expect(columns.includes("sus_serious_injry_cnt")).toEqual(true);
   expect(columns.includes("atd_fatality_count")).toEqual(true);
   expect(columns.includes("est_comp_cost")).toEqual(true);
-  expect(columns.includes("collision { collsn_desc } ")).toEqual(true);
+  expect(columns.includes("collision { collsn_desc }")).toEqual(true);
   expect(
     columns.includes("units { unit_description { veh_unit_desc_desc } }")
   ).toEqual(true);
@@ -156,4 +185,13 @@ test("The sort/order settings must load", () => {
   expect(orderBy[1]).toEqual("desc");
   expect(where[0]).toEqual("location_id");
   expect(where[1]).toEqual('_eq: "1"');
+});
+
+/**
+ * Tests if the query generates as expected
+ */
+test("The class generates correct query", () => {
+  // Generate the query in the class, and compare against expected value
+  const instanceQuery = gqlAbstractGlobalInstance.query;
+  expect(instanceQuery).toEqual(finalQueryGraphQL);
 });
