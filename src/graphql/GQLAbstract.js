@@ -264,6 +264,15 @@ class GQLAbstract {
   }
 
   /**
+   * Returns true if the column contains a filter
+   * @param {string} columnName - The name of the column in the config
+   * @return {boolean}
+   */
+  hasFilter(columnName) {
+    return !!this.config.columns[columnName].filter;
+  }
+
+  /**
    * Returns the default value when value is null
    * @param {string} columnName - The name of the column in the config
    * @returns {string}
@@ -284,6 +293,10 @@ class GQLAbstract {
       return "-";
     } else {
       value = String(value);
+    }
+
+    if (this.hasFilter(columnName)) {
+      return this.config.columns[columnName].filter(value);
     }
 
     switch (type) {
