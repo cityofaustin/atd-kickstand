@@ -196,6 +196,10 @@ var GQLAbstract = /*#__PURE__*/function () {
     return (this.config.columns[columnName].type || "string").toLowerCase();
   };
 
+  _proto.hasFilter = function hasFilter(columnName) {
+    return !!this.config.columns[columnName].filter;
+  };
+
   _proto.getDefault = function getDefault(columnName) {
     return this.config.columns[columnName]["default"];
   };
@@ -207,6 +211,10 @@ var GQLAbstract = /*#__PURE__*/function () {
       return "-";
     } else {
       value = String(value);
+    }
+
+    if (this.hasFilter(columnName)) {
+      return this.config.columns[columnName].filter(value);
     }
 
     switch (type) {
