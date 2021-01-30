@@ -180,7 +180,7 @@ class GQLAbstract {
    */
   setOr(key, syntax) {
     if (!this.config.or) this.config.or = {};
-    this.config.or[key[0]] = syntax[0];
+    this.config.or[key] = syntax;
   }
 
   /**
@@ -377,6 +377,8 @@ class GQLAbstract {
    */
   generateFilters(aggregate = false) {
     const output = [];
+    const where = [];
+    const or = [];
 
     // Aggregates do not need limit and offset filters
     if (aggregate === false) {
@@ -389,9 +391,8 @@ class GQLAbstract {
       }
     }
 
+    // If there are any where
     if (this.config.where !== null) {
-      const where = [];
-      const or = [];
       for (const [key, value] of this.getEntries("where")) {
         // If we have a nested expression for a key, then append to 'or'
         if (this.isNestedKey(key)) {
@@ -401,17 +402,20 @@ class GQLAbstract {
           where.push(`${key}: {${value}}`);
         }
       }
-      if (this.config.or) {
-        for (const [key, value] of this.getEntries("or")) {
-          or.push(`{${key}: {${value}}}`);
-        }
-      }
-      if (or.length > 0) {
-        output.push(`where: {${where.join(", ")}, _or: [${or.join(", ")}]}`);
-      } else {
-        output.push(`where: {${where.join(", ")}}`);
+    }
+
+    if (this.config.or !== null) {
+      for (const [key, value] of this.getEntries("or")) {
+        or.push(`{${key}: {${value}}}`);
       }
     }
+
+    output.push(
+      "where: {" +
+        (where.length > 0 ? where.join(", ") + ", " : "") +
+        (or.length > 0 ? "_or: [" + or.join(", ") + "]" : "") +
+        "}"
+    );
 
     if (this.config.order_by) {
       const orderBy = [];
@@ -434,31 +438,6 @@ class GQLAbstract {
    */
   generateColumns() {
     return this.columns.join("\n");
-  }
-
-  /**
-   * Generates a series of 'where' clauses in GraphQL for each filter setting provided in the configuration
-   * and the current state of the app.
-   * @param {object} filters - The filters configuration
-   * @param {object} filtersState - The current filter's state
-   */
-  loadFilters(filters, filtersState) {
-    for (const group in filters) {
-      for (const filter of filters[group].filters) {
-        for (const filterItem of filter.filter.where) {
-          for (const [key, syntax] of this.getEntries(filterItem)) {
-            // If enabled, add to the list or remove it from the query.
-            if (filtersState[filter.id]) {
-              key === "or"
-                ? this.setOr(Object.keys(syntax), Object.values(syntax))
-                : this.setWhere(key, syntax);
-            } else {
-              key === "or" ? this.deleteOr(syntax) : this.deleteWhere(key);
-            }
-          }
-        }
-      }
-    }
   }
 
   /**
