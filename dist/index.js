@@ -156,7 +156,7 @@ var GQLAbstract = /*#__PURE__*/function () {
 
   _proto.setOr = function setOr(key, syntax) {
     if (!this.config.or) this.config.or = {};
-    this.config.or[key[0]] = syntax[0];
+    this.config.or[key] = syntax;
   };
 
   _proto.deleteWhere = function deleteWhere(key) {
@@ -273,6 +273,8 @@ var GQLAbstract = /*#__PURE__*/function () {
     }
 
     var output = [];
+    var where = [];
+    var or = [];
 
     if (aggregate === false) {
       if (this.config.limit) {
@@ -285,36 +287,29 @@ var GQLAbstract = /*#__PURE__*/function () {
     }
 
     if (this.config.where !== null) {
-      var where = [];
-      var or = [];
-
       for (var _iterator = _createForOfIteratorHelperLoose(this.getEntries("where")), _step; !(_step = _iterator()).done;) {
         var _step$value = _step.value,
-            _key = _step$value[0],
-            _value = _step$value[1];
+            key = _step$value[0],
+            value = _step$value[1];
 
-        if (this.isNestedKey(_key)) {
-          or.push("{ " + _key + " }");
+        if (this.isNestedKey(key)) {
+          or.push("{ " + key + " }");
         } else {
-          where.push(_key + ": {" + _value + "}");
+          where.push(key + ": {" + value + "}");
         }
-      }
-
-      if (this.config.or) {
-        for (var _iterator2 = _createForOfIteratorHelperLoose(this.getEntries("or")), _step2; !(_step2 = _iterator2()).done;) {
-          var _step2$value = _step2.value,
-              key = _step2$value[0],
-              value = _step2$value[1];
-          or.push("{" + key + ": {" + value + "}}");
-        }
-      }
-
-      if (or.length > 0) {
-        output.push("where: {" + where.join(", ") + ", _or: [" + or.join(", ") + "]}");
-      } else {
-        output.push("where: {" + where.join(", ") + "}");
       }
     }
+
+    if (this.config.or !== null) {
+      for (var _iterator2 = _createForOfIteratorHelperLoose(this.getEntries("or")), _step2; !(_step2 = _iterator2()).done;) {
+        var _step2$value = _step2.value,
+            _key = _step2$value[0],
+            _value = _step2$value[1];
+        or.push("{" + _key + ": {" + _value + "}}");
+      }
+    }
+
+    output.push("where: {" + (where.length > 0 ? where.join(", ") + ", " : "") + (or.length > 0 ? "_or: [" + or.join(", ") + "]" : "") + "}");
 
     if (this.config.order_by) {
       var orderBy = [];
@@ -334,30 +329,6 @@ var GQLAbstract = /*#__PURE__*/function () {
 
   _proto.generateColumns = function generateColumns() {
     return this.columns.join("\n");
-  };
-
-  _proto.loadFilters = function loadFilters(filters, filtersState) {
-    for (var group in filters) {
-      for (var _iterator4 = _createForOfIteratorHelperLoose(filters[group].filters), _step4; !(_step4 = _iterator4()).done;) {
-        var filter = _step4.value;
-
-        for (var _iterator5 = _createForOfIteratorHelperLoose(filter.filter.where), _step5; !(_step5 = _iterator5()).done;) {
-          var filterItem = _step5.value;
-
-          for (var _iterator6 = _createForOfIteratorHelperLoose(this.getEntries(filterItem)), _step6; !(_step6 = _iterator6()).done;) {
-            var _step6$value = _step6.value,
-                key = _step6$value[0],
-                syntax = _step6$value[1];
-
-            if (filtersState[filter.id]) {
-              key === "or" ? this.setOr(Object.keys(syntax), Object.values(syntax)) : this.setWhere(key, syntax);
-            } else {
-              key === "or" ? this.deleteOr(syntax) : this.deleteWhere(key);
-            }
-          }
-        }
-      }
-    }
   };
 
   _proto.queryCSV = function queryCSV(string) {
@@ -458,10 +429,10 @@ var GQLAbstract = /*#__PURE__*/function () {
     get: function get() {
       var columns = [];
 
-      for (var _iterator7 = _createForOfIteratorHelperLoose(this.getEntries("columns")), _step7; !(_step7 = _iterator7()).done;) {
-        var _step7$value = _step7.value,
-            key = _step7$value[0],
-            value = _step7$value[1];
+      for (var _iterator4 = _createForOfIteratorHelperLoose(this.getEntries("columns")), _step4; !(_step4 = _iterator4()).done;) {
+        var _step4$value = _step4.value,
+            key = _step4$value[0],
+            value = _step4$value[1];
         if (value.searchable) columns.push(key);
       }
 
