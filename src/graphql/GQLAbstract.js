@@ -138,7 +138,7 @@ class GQLAbstract {
    * Resets the value of where and or to empty
    */
   cleanWhere() {
-    this.config.where = null;
+    this.config.where = { ...this.configInit.where };
     this.config.or = null;
   }
 
