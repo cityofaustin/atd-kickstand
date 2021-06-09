@@ -140,6 +140,7 @@ class GQLAbstract {
   cleanWhere() {
     this.config.where = { ...this.configInit.where };
     this.config.or = null;
+    this.config.and = null;
   }
 
   /**
@@ -170,7 +171,12 @@ class GQLAbstract {
    */
   setWhere(key, syntax) {
     if (!this.config.where) this.config.where = {};
-    this.config.where[key] = syntax;
+    // if the key already exists in the config, we are adding an additional query for same key
+    if (this.config.where[key]) {
+      this.setAnd(key, syntax);
+    } else {
+      this.config.where[key] = syntax;
+    }
   }
 
   /**
@@ -181,6 +187,20 @@ class GQLAbstract {
   setOr(key, syntax) {
     if (!this.config.or) this.config.or = {};
     this.config.or[key] = syntax;
+  }
+
+  /**
+   * Replaces or creates an 'and' condition in graphql syntax.
+   * @param {string} key - The name of the column
+   * @param {string} syntax - the graphql syntax for the where condition
+   */
+  setAnd(key, syntax) {
+    if (!this.config.and) this.config.and = {};
+    // if the key has not been added to the "and" entry, copy from "where"
+    if (!this.config.and[key]) {
+      this.config.and[key] = this.config.where[key];
+    }
+    this.config.and[key] = this.config.and[key].concat(",", syntax);
   }
 
   /**
@@ -379,6 +399,7 @@ class GQLAbstract {
     const output = [];
     const where = [];
     const or = [];
+    const and = [];
 
     // Aggregates do not need limit and offset filters
     if (aggregate === false) {
@@ -388,6 +409,15 @@ class GQLAbstract {
 
       if (this.config.offset !== null) {
         output.push("offset: " + this.config.offset);
+      }
+    }
+
+    if (this.config.and !== null) {
+      for (const [key, value] of this.getEntries("and")) {
+        const andValues = value.split(",");
+        andValues.forEach(andValue => and.push(`{${key}: {${andValue}}}`));
+        // remove key from where clause after including the values in "and"
+        this.deleteWhere(key);
       }
     }
 
@@ -414,6 +444,7 @@ class GQLAbstract {
       "where: {" +
         (where.length > 0 ? where.join(", ") + ", " : "") +
         (or.length > 0 ? "_or: [" + or.join(", ") + "]" : "") +
+        (and.length > 0 ? "_and: [" + and.join(", ") + "]" : "") +
         "}"
     );
 
