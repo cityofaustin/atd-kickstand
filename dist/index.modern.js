@@ -151,6 +151,7 @@ var GQLAbstract = /*#__PURE__*/function () {
   _proto.cleanWhere = function cleanWhere() {
     this.config.where = _extends({}, this.configInit.where);
     this.config.or = null;
+    this.config.and = null;
   };
 
   _proto.clearOrderBy = function clearOrderBy() {
@@ -167,12 +168,27 @@ var GQLAbstract = /*#__PURE__*/function () {
 
   _proto.setWhere = function setWhere(key, syntax) {
     if (!this.config.where) this.config.where = {};
-    this.config.where[key] = syntax;
+
+    if (this.config.where[key]) {
+      this.setAnd(key, syntax);
+    } else {
+      this.config.where[key] = syntax;
+    }
   };
 
   _proto.setOr = function setOr(key, syntax) {
     if (!this.config.or) this.config.or = {};
     this.config.or[key] = syntax;
+  };
+
+  _proto.setAnd = function setAnd(key, syntax) {
+    if (!this.config.and) this.config.and = {};
+
+    if (!this.config.and[key]) {
+      this.config.and[key] = this.config.where[key];
+    }
+
+    this.config.and[key] = this.config.and[key].concat(",", syntax);
   };
 
   _proto.deleteWhere = function deleteWhere(key) {
@@ -284,6 +300,8 @@ var GQLAbstract = /*#__PURE__*/function () {
   };
 
   _proto.generateFilters = function generateFilters(aggregate) {
+    var _this2 = this;
+
     if (aggregate === void 0) {
       aggregate = false;
     }
@@ -291,6 +309,7 @@ var GQLAbstract = /*#__PURE__*/function () {
     var output = [];
     var where = [];
     var or = [];
+    var and = [];
 
     if (aggregate === false) {
       if (this.config.limit) {
@@ -302,11 +321,29 @@ var GQLAbstract = /*#__PURE__*/function () {
       }
     }
 
-    if (this.config.where !== null) {
-      for (var _iterator = _createForOfIteratorHelperLoose(this.getEntries("where")), _step; !(_step = _iterator()).done;) {
+    if (this.config.and !== null) {
+      var _loop = function _loop() {
         var _step$value = _step.value,
             key = _step$value[0],
             value = _step$value[1];
+        var andValues = value.split(",");
+        andValues.forEach(function (andValue) {
+          return and.push("{" + key + ": {" + andValue + "}}");
+        });
+
+        _this2.deleteWhere(key);
+      };
+
+      for (var _iterator = _createForOfIteratorHelperLoose(this.getEntries("and")), _step; !(_step = _iterator()).done;) {
+        _loop();
+      }
+    }
+
+    if (this.config.where !== null) {
+      for (var _iterator2 = _createForOfIteratorHelperLoose(this.getEntries("where")), _step2; !(_step2 = _iterator2()).done;) {
+        var _step2$value = _step2.value,
+            key = _step2$value[0],
+            value = _step2$value[1];
 
         if (this.isNestedKey(key)) {
           or.push("{ " + key + " }");
@@ -317,23 +354,23 @@ var GQLAbstract = /*#__PURE__*/function () {
     }
 
     if (this.config.or !== null) {
-      for (var _iterator2 = _createForOfIteratorHelperLoose(this.getEntries("or")), _step2; !(_step2 = _iterator2()).done;) {
-        var _step2$value = _step2.value,
-            _key = _step2$value[0],
-            _value = _step2$value[1];
+      for (var _iterator3 = _createForOfIteratorHelperLoose(this.getEntries("or")), _step3; !(_step3 = _iterator3()).done;) {
+        var _step3$value = _step3.value,
+            _key = _step3$value[0],
+            _value = _step3$value[1];
         or.push("{" + _key + ": {" + _value + "}}");
       }
     }
 
-    output.push("where: {" + (where.length > 0 ? where.join(", ") + ", " : "") + (or.length > 0 ? "_or: [" + or.join(", ") + "]" : "") + "}");
+    output.push("where: {" + (where.length > 0 ? where.join(", ") + ", " : "") + (or.length > 0 ? "_or: [" + or.join(", ") + "]" : "") + (and.length > 0 ? "_and: [" + and.join(", ") + "]" : "") + "}");
 
     if (this.config.order_by) {
       var orderBy = [];
 
-      for (var _iterator3 = _createForOfIteratorHelperLoose(this.getEntries("order_by")), _step3; !(_step3 = _iterator3()).done;) {
-        var _step3$value = _step3.value,
-            _key2 = _step3$value[0],
-            _value2 = _step3$value[1];
+      for (var _iterator4 = _createForOfIteratorHelperLoose(this.getEntries("order_by")), _step4; !(_step4 = _iterator4()).done;) {
+        var _step4$value = _step4.value,
+            _key2 = _step4$value[0],
+            _value2 = _step4$value[1];
         orderBy.push(this.isNestedKey(_key2) ? this.sortifyNestedKey(_key2, _value2) : _key2 + ": " + _value2);
       }
 
@@ -359,7 +396,7 @@ var GQLAbstract = /*#__PURE__*/function () {
   };
 
   _proto.queryAggregate = function queryAggregate(queryConfigArray, queryInstance) {
-    var _this2 = this;
+    var _this3 = this;
 
     var aggregatesQueryArray = [];
     queryConfigArray.forEach(function (config) {
@@ -371,7 +408,7 @@ var GQLAbstract = /*#__PURE__*/function () {
         var filter = _ref[0],
             value = _ref[1];
 
-        if (_this2.isNestedKey(filter)) {
+        if (_this3.isNestedKey(filter)) {
           orFilters.push("{ " + filter + " }");
         } else {
           whereFilters.push(filter + ": { " + value + " }");
@@ -445,10 +482,10 @@ var GQLAbstract = /*#__PURE__*/function () {
     get: function get() {
       var columns = [];
 
-      for (var _iterator4 = _createForOfIteratorHelperLoose(this.getEntries("columns")), _step4; !(_step4 = _iterator4()).done;) {
-        var _step4$value = _step4.value,
-            key = _step4$value[0],
-            value = _step4$value[1];
+      for (var _iterator5 = _createForOfIteratorHelperLoose(this.getEntries("columns")), _step5; !(_step5 = _iterator5()).done;) {
+        var _step5$value = _step5.value,
+            key = _step5$value[0],
+            value = _step5$value[1];
         if (value.searchable) columns.push(key);
       }
 
